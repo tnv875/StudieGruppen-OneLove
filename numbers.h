@@ -2,6 +2,8 @@
 #include "bits.h"
 
 unsigned int get_bit(unsigned int x, int i) {
+    assert(x < 256);
+    assert(i < 8);
     return x >> i & 1;
 }
 
@@ -20,6 +22,8 @@ struct bits8 bits8_from_int(unsigned int x) {
 }
 
 unsigned int set_bit(unsigned int x, int i) {
+    assert(x < 256);
+    assert(i < 8);
     return 1 << i | x;
 }
 
