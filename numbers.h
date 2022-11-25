@@ -1,6 +1,10 @@
 /* Do NOT use C control flow such as if/else statements in this file */
 #include "bits.h"
 
+
+// TASK 2
+
+
 // helper function - returns bit i from the integer x
 unsigned int get_bit(unsigned int x, int i) {
     assert(x < 256);
@@ -56,4 +60,31 @@ void bits8_print(struct bits8 v) {
         v.b1.v, 
         v.b0.v
     );
+}
+
+
+// TASK 3
+
+
+// defines a new type to contain two bits
+struct add_result {
+    struct bit s;
+    struct bit c;
+};
+
+// helper function - implements a full adder (function (1) and (2) from the assignment)
+struct add_result bit_add(struct bit x, struct bit y, struct bit c) {
+    struct add_result a;
+    // calculating value of s (sum)
+    a.s = bit_xor(c, bit_xor(x, y));
+
+    // Calculating value of c (c-out)
+    a.c = bit_or(bit_and(x, y), bit_and((bit_or(x, y)), c)); 
+
+    return a;
+}
+
+/*
+struct bits8 bits8_add(struct bits8 x, struct bits8 y) {
+    // TODO
 }
