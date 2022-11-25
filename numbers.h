@@ -1,12 +1,14 @@
-/* Do NOT use C control flow such as if/else statements in this file*/
+/* Do NOT use C control flow such as if/else statements in this file */
 #include "bits.h"
 
+// helper function - returns bit i from the integer x
 unsigned int get_bit(unsigned int x, int i) {
     assert(x < 256);
     assert(i < 8);
     return x >> i & 1;
 }
 
+// Convert C integer to a bits8
 struct bits8 bits8_from_int(unsigned int x) {
     assert(x < 256);
     struct bits8 c;
@@ -21,12 +23,14 @@ struct bits8 bits8_from_int(unsigned int x) {
     return c;
 }
 
+// helper function - returns x but with the bit at position i set to 1
 unsigned int set_bit(unsigned int x, int i) {
     assert(x < 256);
     assert(i < 8);
     return 1 << i | x;
 }
 
+// Convert a bits8 to a C integer
 unsigned int bits8_to_int(struct bits8 x) {
     unsigned int c = 0;
     c = c | (bit_to_int(x.b0) * set_bit(0,0));
