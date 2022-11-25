@@ -1,7 +1,21 @@
 #include "numbers.h"
 
 int main() {
-    struct bits8 byte1 = bits8_from_int(1);
+    // TASK 2
+    
+    // bits8 structs used for tests
+    struct bits8 byte1 = bits8_from_int(1);    
+    struct bits8 byte2 = bits8_from_int(255);
+    struct bits8 byte3 = bits8_from_int(133);
+
+    // get_bit
+    assert(get_bit(2,1) == 1);
+    assert(get_bit(2,0) == 0);
+    assert(get_bit(4,2) == 1);
+    assert(get_bit(5,2) == 1);
+    assert(get_bit(5,0) == 1);
+    
+    // bits8_from_int
     assert(
             byte1.b7.v == false
         &&  byte1.b6.v == false
@@ -13,27 +27,35 @@ int main() {
         &&  byte1.b0.v == true
     );
 
-    struct bits8 byte2 = bits8_from_int(255);
     assert(
-            byte1.b7.v == true
-        &&  byte1.b6.v == true
-        &&  byte1.b5.v == true
-        &&  byte1.b4.v == true
-        &&  byte1.b3.v == true
-        &&  byte1.b2.v == true
-        &&  byte1.b1.v == true
-        &&  byte1.b0.v == true
+            byte2.b7.v == true
+        &&  byte2.b6.v == true
+        &&  byte2.b5.v == true
+        &&  byte2.b4.v == true
+        &&  byte2.b3.v == true
+        &&  byte2.b2.v == true
+        &&  byte2.b1.v == true
+        &&  byte2.b0.v == true
     );
 
-    struct bits8 byte3 = bits8_from_int(133);
     assert(
-            byte1.b7.v == true
-        &&  byte1.b6.v == false
-        &&  byte1.b5.v == false
-        &&  byte1.b4.v == false
-        &&  byte1.b3.v == false
-        &&  byte1.b2.v == true
-        &&  byte1.b1.v == false
-        &&  byte1.b0.v == true
+            byte3.b7.v == true
+        &&  byte3.b6.v == false
+        &&  byte3.b5.v == false
+        &&  byte3.b4.v == false
+        &&  byte3.b3.v == false
+        &&  byte3.b2.v == true
+        &&  byte3.b1.v == false
+        &&  byte3.b0.v == true
     );
+
+    // set_bit
+    assert(set_bit(2, 0) == 3);
+    assert(set_bit(2, 1) == 2);
+    assert(set_bit(2, 2) == 6);
+
+    // bits8_to_int
+    assert(bits8_to_int(byte1) == 1);
+    assert(bits8_to_int(byte2) == 255);
+    assert(bits8_to_int(byte3) == 133);
 }
