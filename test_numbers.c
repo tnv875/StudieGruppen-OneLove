@@ -7,6 +7,7 @@ int main() {
     struct bits8 byte1 = bits8_from_int(1);    
     struct bits8 byte2 = bits8_from_int(255);
     struct bits8 byte3 = bits8_from_int(133);
+    struct bits8 byte4 = bits8_from_int(5);
 
     // get_bit
     assert(get_bit(2,1) == 1);
@@ -61,6 +62,12 @@ int main() {
 
     // TASK 3
     // bits8_add
-    assert(bits8_to_int(bits8_add(byte1, byte3)) == 1 + 133);
-}
+    assert(bits8_to_int(bits8_add(byte1, byte3)) == 134);
+    assert(bits8_to_int(bits8_add(byte1, byte4)) == 6);
 
+    int t0 = bits8_to_int(bits8_add(byte1, byte3));
+    int t1 = bits8_to_int(bits8_add(byte1, byte4));
+    printf("Test af bits8_add:\n");
+    printf("1 + 133 = %d\n", t0);
+    printf("1 + 5 = %d\n", t1);
+}
