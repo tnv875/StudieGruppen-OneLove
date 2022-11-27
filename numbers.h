@@ -84,7 +84,17 @@ struct add_result bit_add(struct bit x, struct bit y, struct bit c) {
     return a;
 }
 
-/*
 struct bits8 bits8_add(struct bits8 x, struct bits8 y) {
-    // TODO
+    struct bits8 t;
+    t.b0 = ; 
+    t.b1 = ;
+    t.b2 = ;
+    t.b3 = ;
+    t.b4 = ;
+    t.b5 = ;
+    t.b6 = ;
+    t.b7 = ;
+
+    return t;
 }
+ 
