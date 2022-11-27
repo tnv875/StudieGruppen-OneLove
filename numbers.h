@@ -124,6 +124,28 @@ struct bits8 bits8_negate(struct bits8 x) {
     return x;
 }
 
-struct bits8 bits8_mul(struct bits8 x, struct bits8 y) {
+struct bits8 full_bits8(struct bit v) {
+    struct bits8 x;
+    x.b0 = v;
+    x.b1 = v;
+    x.b2 = v;
+    x.b3 = v;
+    x.b4 = v;
+    x.b5 = v;
+    x.b6 = v;
+    x.b7 = v;
+    return x;
+}
 
+struct bits8 bits8_mul(struct bits8 x, struct bits8 y) {
+    struct bits8 c = bits8_from_int(0);
+    c = bits8_add(c, bits8_from_int((bits8_to_int(x) & bits8_to_int(full_bits8(y.b0)))     ));
+    c = bits8_add(c, bits8_from_int((bits8_to_int(x) & bits8_to_int(full_bits8(y.b1))) << 1));
+    c = bits8_add(c, bits8_from_int((bits8_to_int(x) & bits8_to_int(full_bits8(y.b2))) << 2));
+    c = bits8_add(c, bits8_from_int((bits8_to_int(x) & bits8_to_int(full_bits8(y.b3))) << 3));
+    c = bits8_add(c, bits8_from_int((bits8_to_int(x) & bits8_to_int(full_bits8(y.b4))) << 4));
+    c = bits8_add(c, bits8_from_int((bits8_to_int(x) & bits8_to_int(full_bits8(y.b5))) << 5));
+    c = bits8_add(c, bits8_from_int((bits8_to_int(x) & bits8_to_int(full_bits8(y.b6))) << 6));
+    c = bits8_add(c, bits8_from_int((bits8_to_int(x) & bits8_to_int(full_bits8(y.b7))) << 7));
+    return c;
 }

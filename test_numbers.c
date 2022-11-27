@@ -5,10 +5,10 @@ int main() {
 
     // bits8 structs used for tests
     struct bits8 byte1 = bits8_from_int(1);    
-    struct bits8 byte2 = bits8_from_int(255);
-    struct bits8 byte3 = bits8_from_int(133);
-    struct bits8 byte4 = bits8_from_int(5);
-    struct bits8 byte5 = bits8_from_int(2);
+    struct bits8 byte3 = bits8_from_int(3);
+    struct bits8 byte5 = bits8_from_int(5);
+    struct bits8 byte133 = bits8_from_int(133);
+    struct bits8 byte255 = bits8_from_int(255);
 
     // get_bit
     assert(get_bit(2,1) == 1);
@@ -16,7 +16,7 @@ int main() {
     assert(get_bit(4,2) == 1);
     assert(get_bit(5,2) == 1);
     assert(get_bit(5,0) == 1);
-    
+      
     // bits8_from_int
     assert(
             byte1.b7.v == false
@@ -30,25 +30,25 @@ int main() {
     );
 
     assert(
-            byte2.b7.v == true
-        &&  byte2.b6.v == true
-        &&  byte2.b5.v == true
-        &&  byte2.b4.v == true
-        &&  byte2.b3.v == true
-        &&  byte2.b2.v == true
-        &&  byte2.b1.v == true
-        &&  byte2.b0.v == true
+            byte255.b7.v == true
+        &&  byte255.b6.v == true
+        &&  byte255.b5.v == true
+        &&  byte255.b4.v == true
+        &&  byte255.b3.v == true
+        &&  byte255.b2.v == true
+        &&  byte255.b1.v == true
+        &&  byte255.b0.v == true
     );
 
     assert(
-            byte3.b7.v == true
-        &&  byte3.b6.v == false
-        &&  byte3.b5.v == false
-        &&  byte3.b4.v == false
-        &&  byte3.b3.v == false
-        &&  byte3.b2.v == true
-        &&  byte3.b1.v == false
-        &&  byte3.b0.v == true
+            byte133.b7.v == true
+        &&  byte133.b6.v == false
+        &&  byte133.b5.v == false
+        &&  byte133.b4.v == false
+        &&  byte133.b3.v == false
+        &&  byte133.b2.v == true
+        &&  byte133.b1.v == false
+        &&  byte133.b0.v == true
     );
 
     // set_bit
@@ -58,27 +58,28 @@ int main() {
 
     // bits8_to_int
     assert(bits8_to_int(byte1) == 1);
-    assert(bits8_to_int(byte2) == 255);
-    assert(bits8_to_int(byte3) == 133);
+    assert(bits8_to_int(byte255) == 255);
+    assert(bits8_to_int(byte133) == 133);
 
     // TASK 3
     // bits8_add
-    assert(bits8_to_int(bits8_add(byte1, byte3)) == 134);
-    assert(bits8_to_int(bits8_add(byte1, byte4)) == 6);
+    assert(bits8_to_int(bits8_add(byte1, byte133)) == 134);
+    assert(bits8_to_int(bits8_add(byte1, byte5)) == 6);
 
-    int t0 = bits8_to_int(bits8_add(byte1, byte3));
-    int t1 = bits8_to_int(bits8_add(byte1, byte4));
+    int t0 = bits8_to_int(bits8_add(byte1, byte133));
+    int t1 = bits8_to_int(bits8_add(byte1, byte5));
     printf("Test af bits8_add:\n");
     printf("1 + 133 = %d\n", t0);
     printf("1 + 5 = %d\n", t1);
 
     // bits8_negate()
-    assert(bits8_to_int(bits8_negate(byte1)) == -1 * 1);
+    assert(bits8_to_int(bits8_negate(byte1)) == 255); // U255 = -1 TC
     printf("Test af bits8_negate");
-    int t0 = bits8_to_int(bits8_negate(byte1));
-    printf("-1 * 1 = %d\n", t0);
+    int t2 = bits8_to_int(bits8_negate(byte1));
+    printf("-1 * 1 = %d\n", t2);
 
     // bits8_mul()
-    assert(bits8_to_int(bits8_mul(byte4, byte5)) == 10);
-    assert(bits8_to_int(bits8_mul(byte1, byte4)) == 5);
+    bits8_print(bits8_mul(byte5, byte3)); 
+    assert(bits8_to_int(bits8_mul(byte5, byte3)) == 15);
+    assert(bits8_to_int(bits8_mul(byte1, byte5)) == 5); 
 }
