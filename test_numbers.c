@@ -2,7 +2,7 @@
 
 int main() {
     // TASK 2
-    
+
     // bits8 structs used for tests
     struct bits8 byte1 = bits8_from_int(1);    
     struct bits8 byte2 = bits8_from_int(255);
@@ -58,4 +58,9 @@ int main() {
     assert(bits8_to_int(byte1) == 1);
     assert(bits8_to_int(byte2) == 255);
     assert(bits8_to_int(byte3) == 133);
+
+    // TASK 3
+    // bits8_add
+    assert(bits8_to_int(bits8_add(byte1, byte3)) == 1 + 133);
 }
+

@@ -1,4 +1,3 @@
-/* Do NOT use C control flow such as if/else statements in this file */
 #include "bits.h"
 
 
@@ -32,6 +31,10 @@ unsigned int set_bit(unsigned int x, int i) {
     assert(x < 256);
     assert(i < 8);
     return 1 << i | x;
+    // x = 0001 0101
+    // 1 = 0000 0001
+    // i = 3
+    // y = 0001 1101
 }
 
 // Convert a bits8 to a C integer
@@ -68,8 +71,8 @@ void bits8_print(struct bits8 v) {
 
 // defines a new type to contain two bits
 struct add_result {
-    struct bit s;
-    struct bit c;
+    struct bit s; // sum
+    struct bit c; // carry
 };
 
 // helper function - implements a full adder (function (1) and (2) from the assignment)
@@ -87,15 +90,23 @@ struct add_result bit_add(struct bit x, struct bit y, struct bit c) {
 
 struct bits8 bits8_add(struct bits8 x, struct bits8 y) {
     struct bits8 t;
-    t.b0 = ; 
-    t.b1 = ;
-    t.b2 = ;
-    t.b3 = ;
-    t.b4 = ;
-    t.b5 = ;
-    t.b6 = ;
-    t.b7 = ;
-
+    struct bit c;
+    c.v = 0;
+    struct add_result b0 = bit_add(x.b0, y.b0, c);
+    t.b0 = b0.s;
+    struct add_result b1 = bit_add(x.b1, y.b1, b0.c);
+    t.b1 = b1.s;
+    struct add_result b2 = bit_add(x.b2, y.b2, b1.c);
+    t.b2 = b2.s;
+    struct add_result b3 = bit_add(x.b3, y.b3, b2.c);
+    t.b3 = b3.s;
+    struct add_result b4 = bit_add(x.b4, y.b4, b3.c);
+    t.b4 = b4.s;
+    struct add_result b5 = bit_add(x.b5, y.b5, b4.c);
+    t.b5 = b5.s;
+    struct add_result b6 = bit_add(x.b6, y.b6, b5.c);
+    t.b6 = b6.s;
+    struct add_result b7 = bit_add(x.b7, y.b7, b6.c);
+    t.b7 = b7.s;
     return t;
 }
- 
