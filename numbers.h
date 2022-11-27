@@ -123,3 +123,7 @@ struct bits8 bits8_negate(struct bits8 x) {
     x = bits8_add(x, bits8_from_int(1))
     return x;
 }
+
+struct bits8 bits8_mul(struct bits8 x, struct bits8 y) {
+        
+}
