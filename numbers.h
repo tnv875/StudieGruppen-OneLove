@@ -75,10 +75,11 @@ struct add_result {
 // helper function - implements a full adder (function (1) and (2) from the assignment)
 struct add_result bit_add(struct bit x, struct bit y, struct bit c) {
     struct add_result a;
-    // calculating value of s (sum)
+    
+    // calculating value of s
     a.s = bit_xor(c, bit_xor(x, y));
 
-    // Calculating value of c (c-out)
+    // Calculating value of c
     a.c = bit_or(bit_and(x, y), bit_and((bit_or(x, y)), c)); 
 
     return a;
