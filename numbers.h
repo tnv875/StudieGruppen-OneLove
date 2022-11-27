@@ -1,6 +1,5 @@
 #include "bits.h"
 
-
 // TASK 2
 
 
@@ -40,14 +39,14 @@ unsigned int set_bit(unsigned int x, int i) {
 // Convert a bits8 to a C integer
 unsigned int bits8_to_int(struct bits8 x) {
     unsigned int c = 0;
-    c = c | (bit_to_int(x.b0) * set_bit(0,0));
-    c = c | (bit_to_int(x.b1) * set_bit(0,1));
-    c = c | (bit_to_int(x.b2) * set_bit(0,2));
-    c = c | (bit_to_int(x.b3) * set_bit(0,3));
-    c = c | (bit_to_int(x.b4) * set_bit(0,4));
-    c = c | (bit_to_int(x.b5) * set_bit(0,5));
-    c = c | (bit_to_int(x.b6) * set_bit(0,6));
-    c = c | (bit_to_int(x.b7) * set_bit(0,7)); 
+    c = (bit_to_int(x.b0)      & set_bit(0,0)) | c;
+    c = (bit_to_int(x.b1) << 1 & set_bit(0,1)) | c;
+    c = (bit_to_int(x.b2) << 2 & set_bit(0,2)) | c;
+    c = (bit_to_int(x.b3) << 3 & set_bit(0,3)) | c;
+    c = (bit_to_int(x.b4) << 4 & set_bit(0,4)) | c;
+    c = (bit_to_int(x.b5) << 5 & set_bit(0,5)) | c;
+    c = (bit_to_int(x.b6) << 6 & set_bit(0,6)) | c;
+    c = (bit_to_int(x.b7) << 7 & set_bit(0,7)) | c; 
     return c;
 }
 
@@ -66,8 +65,7 @@ void bits8_print(struct bits8 v) {
 }
 
 
-// TASK 3
-
+// TASK 3   
 
 // defines a new type to contain two bits
 struct add_result {
@@ -111,6 +109,7 @@ struct bits8 bits8_add(struct bits8 x, struct bits8 y) {
     return t;
 }
 
+// TASK 4
 struct bits8 bits8_negate(struct bits8 x) {
     x.b0 = bit_not(x.b0);
     x.b1 = bit_not(x.b1);
@@ -124,6 +123,8 @@ struct bits8 bits8_negate(struct bits8 x) {
     return x;
 }
 
+// TASK 5
+// Helper function for bits8_mul
 struct bits8 full_bits8(struct bit v) {
     struct bits8 x;
     x.b0 = v;
@@ -136,16 +137,21 @@ struct bits8 full_bits8(struct bit v) {
     x.b7 = v;
     return x;
 }
-
+// Helper function for bits8_mul
+struct bits8 bit_mul(struct bits8 x, struct bit y, unsigned int i)
+{
+    return bits8_from_int((bits8_to_int(x) & bits8_to_int(full_bits8(y))) << i);
+}
 struct bits8 bits8_mul(struct bits8 x, struct bits8 y) {
+
     struct bits8 c = bits8_from_int(0);
-    c = bits8_add(c, bits8_from_int((bits8_to_int(x) & bits8_to_int(full_bits8(y.b0)))     ));
-    c = bits8_add(c, bits8_from_int((bits8_to_int(x) & bits8_to_int(full_bits8(y.b1))) << 1));
-    c = bits8_add(c, bits8_from_int((bits8_to_int(x) & bits8_to_int(full_bits8(y.b2))) << 2));
-    c = bits8_add(c, bits8_from_int((bits8_to_int(x) & bits8_to_int(full_bits8(y.b3))) << 3));
-    c = bits8_add(c, bits8_from_int((bits8_to_int(x) & bits8_to_int(full_bits8(y.b4))) << 4));
-    c = bits8_add(c, bits8_from_int((bits8_to_int(x) & bits8_to_int(full_bits8(y.b5))) << 5));
-    c = bits8_add(c, bits8_from_int((bits8_to_int(x) & bits8_to_int(full_bits8(y.b6))) << 6));
-    c = bits8_add(c, bits8_from_int((bits8_to_int(x) & bits8_to_int(full_bits8(y.b7))) << 7));
+    c = bits8_add(c, bit_mul(x, y.b0, 0));
+    c = bits8_add(c, bit_mul(x, y.b1, 1));
+    c = bits8_add(c, bit_mul(x, y.b2, 2));
+    c = bits8_add(c, bit_mul(x, y.b3, 3));
+    c = bits8_add(c, bit_mul(x, y.b4, 4));
+    c = bits8_add(c, bit_mul(x, y.b5, 5));
+    c = bits8_add(c, bit_mul(x, y.b6, 6));
+    c = bits8_add(c, bit_mul(x, y.b7, 7));
     return c;
 }

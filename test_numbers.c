@@ -51,13 +51,14 @@ int main() {
         &&  byte133.b0.v == true
     );
 
-    // set_bit
+    // set_bit 
     assert(set_bit(2, 0) == 3);
-    assert(set_bit(2, 1) == 2);
-    assert(set_bit(2, 2) == 6);
+    assert(set_bit(2, 1) == 2); 
+    assert(set_bit(2, 2) == 6);  
 
     // bits8_to_int
     assert(bits8_to_int(byte1) == 1);
+    printf("%d", bits8_to_int(byte255)); 
     assert(bits8_to_int(byte255) == 255);
     assert(bits8_to_int(byte133) == 133);
 
@@ -70,7 +71,7 @@ int main() {
     int t1 = bits8_to_int(bits8_add(byte1, byte5));
     printf("Test af bits8_add:\n");
     printf("1 + 133 = %d\n", t0);
-    printf("1 + 5 = %d\n", t1);
+    printf("1 + 5 = %d\n", t1); 
 
     // bits8_negate()
     assert(bits8_to_int(bits8_negate(byte1)) == 255); // U255 = -1 TC
