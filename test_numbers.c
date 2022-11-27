@@ -70,4 +70,6 @@ int main() {
     printf("Test af bits8_add:\n");
     printf("1 + 133 = %d\n", t0);
     printf("1 + 5 = %d\n", t1);
+
+    // 
 }
