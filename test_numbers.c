@@ -80,4 +80,5 @@ int main() {
 
     // bits8_mul()
     assert(bits8_to_int(bits8_mul(byte4, byte5)) == 10);
+    assert(bits8_to_int(bits8_mul(byte1, byte4)) == 5);
 }
