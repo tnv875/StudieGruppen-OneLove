@@ -110,3 +110,16 @@ struct bits8 bits8_add(struct bits8 x, struct bits8 y) {
     t.b7 = b7.s;
     return t;
 }
+
+struct bits8 bits8_negate(struct bits8 x) {
+    x.b0 = bit_not(x.b0)
+    x.b1 = bit_not(x.b1)
+    x.b2 = bit_not(x.b2)
+    x.b3 = bit_not(x.b3)
+    x.b4 = bit_not(x.b4)
+    x.b5 = bit_not(x.b5)
+    x.b6 = bit_not(x.b6)
+    x.b7 = bit_not(x.b7)
+    x = bits8_add(x, bits8_from_int(1))
+    return x;
+}
