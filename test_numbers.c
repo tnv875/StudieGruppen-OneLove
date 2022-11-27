@@ -8,6 +8,7 @@ int main() {
     struct bits8 byte2 = bits8_from_int(255);
     struct bits8 byte3 = bits8_from_int(133);
     struct bits8 byte4 = bits8_from_int(5);
+    struct bits8 byte5 = bits8_from_int(2);
 
     // get_bit
     assert(get_bit(2,1) == 1);
@@ -71,5 +72,12 @@ int main() {
     printf("1 + 133 = %d\n", t0);
     printf("1 + 5 = %d\n", t1);
 
-    // 
+    // bits8_negate()
+    assert(bits8_to_int(bits8_negate(byte1)) == -1 * 1);
+    printf("Test af bits8_negate");
+    int t0 = bits8_to_int(bits8_negate(byte1));
+    printf("-1 * 1 = %d\n", t0);
+
+    // bits8_mul()
+    assert(bits8_to_int(bits8_mul(byte4, byte5)) == 10);
 }
