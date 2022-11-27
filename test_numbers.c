@@ -97,9 +97,14 @@ int main() {
     printf("Expected return: byte18 + byte3 = 21   –––> got: %d + %d = %d\n", bits8_to_int(byte18), bits8_to_int(byte3), bits8_to_int(bits8_add(byte18, byte3))); 
     printf("Expected return: byte1 + byte133 = 134 –––> got: %d + %d = %d\n", bits8_to_int(byte1), bits8_to_int(byte133), bits8_to_int(bits8_add(byte1, byte133))); 
 
+/*
     printf("\nTesting if bits8_add provide “correct” results if you pass in negative numbers in twos complement representation:\n");
-    printf("TODO\n");
+    printf("Expected return: byte2 + byte249 = 251 –––> got: %d + %d = %d =", bits8_to_int(bits8_from_int(2)), bits8_to_int(bits8_from_int(249)), bits8_to_int(bits8_add(bits8_from_int(2), bits8_from_int(249)))); 
+    bits8_print(bits8_add(bits8_from_int(2), bits8_from_int(249)));
 
+    printf("Expected return: byte2 + byte-7 (TC) = -5 –––> got: %d + %d = %d =", bits8_to_int(bits8_from_int(2)), bits8_to_int(bits8_from_int(-249)), bits8_to_int(bits8_add(bits8_from_int(2), bits8_from_int(-249)))); 
+    bits8_print(bits8_add(bits8_from_int(2), bits8_from_int(-249)));
+*/ 
 
     // TASK 4
 
@@ -130,5 +135,14 @@ int main() {
     printf("Expected return: 3 * 18 = 54  –––> got: %d * %d = %d = ", bits8_to_int(byte3), bits8_to_int(byte18), 
     bits8_to_int(bits8_mul(byte3, byte18))); bits8_print(bits8_mul(byte3, byte18));
 
+    
+
+    // How would you implement a function bits8_sub() for subtracting 8-bit numbers?
+
+    printf("\nTesting the way we would implement bits8_sub:\n");
+    printf("Expected return: byte5 - byte1 = 4      –––> got: %d\n", bits8_to_int(bits8_add(byte5, bits8_negate(byte1)))); 
+    printf("Expected return: byte1 - byte5 = -4     –––> got: %d (equals -4 in TC, i.e. 1111 1100)\n", bits8_to_int(bits8_add(byte1, bits8_negate(byte5)))); 
+    printf("Expected return: byte133 - byte18 = 115 –––> got: %d\n", bits8_to_int(bits8_add(byte133, bits8_negate(byte18))));
+    
 }
 
