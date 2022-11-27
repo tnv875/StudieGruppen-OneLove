@@ -30,10 +30,6 @@ unsigned int set_bit(unsigned int x, int i) {
     assert(x < 256);
     assert(i < 8);
     return 1 << i | x;
-    // x = 0001 0101
-    // 1 = 0000 0001
-    // i = 3
-    // y = 0001 1101
 }
 
 // Convert a bits8 to a C integer
@@ -138,12 +134,11 @@ struct bits8 full_bits8(struct bit v) {
     return x;
 }
 // Helper function for bits8_mul
-struct bits8 bit_mul(struct bits8 x, struct bit y, unsigned int i)
-{
+struct bits8 bit_mul(struct bits8 x, struct bit y, unsigned int i) {
     return bits8_from_int((bits8_to_int(x) & bits8_to_int(full_bits8(y))) << i);
 }
-struct bits8 bits8_mul(struct bits8 x, struct bits8 y) {
 
+struct bits8 bits8_mul(struct bits8 x, struct bits8 y) {
     struct bits8 c = bits8_from_int(0);
     c = bits8_add(c, bit_mul(x, y.b0, 0));
     c = bits8_add(c, bit_mul(x, y.b1, 1));

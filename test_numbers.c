@@ -73,12 +73,14 @@ int main() {
     printf("1 + 133 = %d\n", t0);
     printf("1 + 5 = %d\n", t1); 
 
+    // TASK 4
     // bits8_negate()
     assert(bits8_to_int(bits8_negate(byte1)) == 255); // U255 = -1 TC
     printf("Test af bits8_negate");
     int t2 = bits8_to_int(bits8_negate(byte1));
     printf("-1 * 1 = %d\n", t2);
 
+    // TASK 5
     // bits8_mul()
     bits8_print(bits8_mul(byte5, byte3)); 
     assert(bits8_to_int(bits8_mul(byte5, byte3)) == 15);
