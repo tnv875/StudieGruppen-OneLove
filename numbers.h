@@ -48,7 +48,7 @@ unsigned int bits8_to_int(struct bits8 x) {
 
 // prints the bits of bits8 in conventional order with no trailing newline
 void bits8_print(struct bits8 v) {
-    printf("%d%d%d%d %d%d%d%d \n", 
+    printf("%d%d%d%d %d%d%d%d", 
         v.b7.v, 
         v.b6.v, 
         v.b5.v,
