@@ -114,9 +114,9 @@ int main() {
     assert(bits8_to_int(bits8_negate(byte133)) == 123);
 
     printf("\n\nA few printed tests of bits8_negate:\n");
-    printf("Expected return: -1 * 1 = 255   –––> got: %d\n", bits8_to_int(bits8_negate(byte1))); 
-    printf("Expected return: -1 * 3 = 253   –––> got: %d\n", bits8_to_int(bits8_negate(byte3))); 
-    printf("Expected return: -1 * 133 = 123 –––> got: %d\n", bits8_to_int(bits8_negate(byte133)));
+    printf("Expected return: -1 * 1 = -1 = 255   –––> got: %d\n", bits8_to_int(bits8_negate(byte1))); 
+    printf("Expected return: -1 * 3 = -3 = 253   –––> got: %d\n", bits8_to_int(bits8_negate(byte3))); 
+    printf("Expected return: -1 * 133 = -133 = 123 –––> got: %d\n", bits8_to_int(bits8_negate(byte133)));
 
 
     // TASK 5
