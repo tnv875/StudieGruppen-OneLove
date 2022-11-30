@@ -1,7 +1,7 @@
 #include "bits.h"
 
-// TASK 2
 
+// TASK 2
 
 // helper function - returns bit i from the integer x
 unsigned int get_bit(unsigned int x, int i) {
@@ -10,7 +10,7 @@ unsigned int get_bit(unsigned int x, int i) {
     return x >> i & 1;
 }
 
-// Convert C integer to a bits8
+// convert C integer to a bits8
 struct bits8 bits8_from_int(unsigned int x) {
     assert(x < 256);
     struct bits8 c;
@@ -32,7 +32,7 @@ unsigned int set_bit(unsigned int x, int i) {
     return 1 << i | x;
 }
 
-// Convert a bits8 to a C integer
+// convert a bits8 to a C integer
 unsigned int bits8_to_int(struct bits8 x) {
     unsigned int c = 0;
     c = (bit_to_int(x.b0)      & set_bit(0,0)) | c;
@@ -46,9 +46,9 @@ unsigned int bits8_to_int(struct bits8 x) {
     return c;
 }
 
-// Prints the bits of bits8 in conventional order with no trailing newline
+// prints the bits of bits8 in conventional order with no trailing newline
 void bits8_print(struct bits8 v) {
-    printf("%d%d%d%d %d%d%d%d ", 
+    printf("%d%d%d%d %d%d%d%d", 
         v.b7.v, 
         v.b6.v, 
         v.b5.v,
@@ -73,15 +73,14 @@ struct add_result {
 struct add_result bit_add(struct bit x, struct bit y, struct bit c) {
     struct add_result a;
     
-    // calculating value of s
-    a.s = bit_xor(c, bit_xor(x, y));
+    a.s = bit_xor(c, bit_xor(x, y)); // calculating value of s
 
-    // Calculating value of c
-    a.c = bit_or(bit_and(x, y), bit_and((bit_or(x, y)), c)); 
+    a.c = bit_or(bit_and(x, y), bit_and((bit_or(x, y)), c)); // calculating value of c
 
     return a;
 }
 
+// interpret x and y to as unsigned 8-bit numbers and return their sum
 struct bits8 bits8_add(struct bits8 x, struct bits8 y) {
     struct bits8 t;
     struct bit c;
@@ -105,7 +104,10 @@ struct bits8 bits8_add(struct bits8 x, struct bits8 y) {
     return t;
 }
 
+
 // TASK 4
+
+// interpret x as an 8-bit two’s complement number and return the arithmetic negation
 struct bits8 bits8_negate(struct bits8 x) {
     x.b0 = bit_not(x.b0);
     x.b1 = bit_not(x.b1);
@@ -119,8 +121,12 @@ struct bits8 bits8_negate(struct bits8 x) {
     return x;
 }
 
+
 // TASK 5
-// Helper function for bits8_mul
+
+
+// helper function for bits8_mul - returns a bit vector of length 8 with either 1's or 0's 
+// according to the given bit, i.e. if the argument v = 1 then the funtion returns x = 1111 1111
 struct bits8 full_bits8(struct bit v) {
     struct bits8 x;
     x.b0 = v;
@@ -133,11 +139,13 @@ struct bits8 full_bits8(struct bit v) {
     x.b7 = v;
     return x;
 }
-// Helper function for bits8_mul
+
+// helper function for bits8_mul 
 struct bits8 bit_mul(struct bits8 x, struct bit y, unsigned int i) {
     return bits8_from_int((bits8_to_int(x) & bits8_to_int(full_bits8(y))) << i);
 }
 
+// interpret x and y as unsigned numbers and return their product
 struct bits8 bits8_mul(struct bits8 x, struct bits8 y) {
     struct bits8 c = bits8_from_int(0);
     c = bits8_add(c, bit_mul(x, y.b0, 0));
