@@ -70,7 +70,7 @@ struct bit bit_xor(struct bit a, struct bit b) {
 }
 
 struct bits8 {
-  struct bit b0;
+  struct bit b0; // Least significant bit
   struct bit b1;
   struct bit b2;
   struct bit b3;
