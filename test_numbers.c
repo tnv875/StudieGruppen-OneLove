@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "numbers.h"
 
 int main() {
@@ -147,4 +148,3 @@ int main() {
     printf("Expected return: byte133 - byte18 = 115 –––> got: %d\n", bits8_to_int(bits8_add(byte133, bits8_negate(byte18))));
     
 }
-
