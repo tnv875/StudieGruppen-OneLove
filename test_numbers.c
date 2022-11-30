@@ -4,7 +4,7 @@ int main() {
     // TASK 2
 
     // bits8 structs used for tests
-    struct bits8 byte1 = bits8_from_int(1);    
+    struct bits8 byte1 = bits8_from_int(1);     
     struct bits8 byte3 = bits8_from_int(3);
     struct bits8 byte5 = bits8_from_int(5);
     struct bits8 byte133 = bits8_from_int(133);
@@ -58,13 +58,15 @@ int main() {
 
     // bits8_to_int
     assert(bits8_to_int(byte1) == 1);
-    printf("%d", bits8_to_int(byte255)); 
     assert(bits8_to_int(byte255) == 255);
     assert(bits8_to_int(byte133) == 133);
 
     // TASK 3
     // bits8_add
     assert(bits8_to_int(bits8_add(byte1, byte133)) == 134);
+    /* The above test corresponds to 1 + (-123) = (-122) in TC 
+    which has the same bit representation as 134 unsigned: 1000 0110 */
+
     assert(bits8_to_int(bits8_add(byte1, byte5)) == 6);
 
     int t0 = bits8_to_int(bits8_add(byte1, byte133));
@@ -76,13 +78,12 @@ int main() {
     // TASK 4
     // bits8_negate()
     assert(bits8_to_int(bits8_negate(byte1)) == 255); // U255 = -1 TC
-    printf("Test af bits8_negate");
+    printf("Test af bits8_negate\n");
     int t2 = bits8_to_int(bits8_negate(byte1));
     printf("-1 * 1 = %d\n", t2);
 
     // TASK 5
     // bits8_mul()
-    bits8_print(bits8_mul(byte5, byte3)); 
     assert(bits8_to_int(bits8_mul(byte5, byte3)) == 15);
     assert(bits8_to_int(bits8_mul(byte1, byte5)) == 5); 
 }
