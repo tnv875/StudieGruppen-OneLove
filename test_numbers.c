@@ -97,14 +97,14 @@ int main() {
     printf("Expected return: byte18 + byte3 = 21   –––> got: %d + %d = %d\n", bits8_to_int(byte18), bits8_to_int(byte3), bits8_to_int(bits8_add(byte18, byte3))); 
     printf("Expected return: byte1 + byte133 = 134 –––> got: %d + %d = %d\n", bits8_to_int(byte1), bits8_to_int(byte133), bits8_to_int(bits8_add(byte1, byte133))); 
 
-/*
-    printf("\nTesting if bits8_add provide “correct” results if you pass in negative numbers in twos complement representation:\n");
-    printf("Expected return: byte2 + byte249 = 251 –––> got: %d + %d = %d =", bits8_to_int(bits8_from_int(2)), bits8_to_int(bits8_from_int(249)), bits8_to_int(bits8_add(bits8_from_int(2), bits8_from_int(249)))); 
-    bits8_print(bits8_add(bits8_from_int(2), bits8_from_int(249)));
 
-    printf("Expected return: byte2 + byte-7 (TC) = -5 –––> got: %d + %d = %d =", bits8_to_int(bits8_from_int(2)), bits8_to_int(bits8_from_int(-249)), bits8_to_int(bits8_add(bits8_from_int(2), bits8_from_int(-249)))); 
-    bits8_print(bits8_add(bits8_from_int(2), bits8_from_int(-249)));
-*/ 
+    printf("\nTesting if bits8_add provide “correct” results if you pass in negative numbers in twos complement representation:\n");
+    printf("Expected return: byte2 - byte6 (TC) = -4   –––> got: %d + %d (TC) = %d = ", bits8_to_int(bits8_from_int(2)), bits8_to_int(bits8_from_int(250)), bits8_to_int(bits8_add(bits8_from_int(2), bits8_from_int(250)))); 
+    bits8_print(bits8_add(bits8_from_int(2), bits8_from_int(250))); printf(" : which equals -4 in TC");
+    printf("\nExpected return: byte10 - byte12 (TC) = -2 –––> got: %d + %d (TC) = %d = ", bits8_to_int(bits8_from_int(10)), bits8_to_int(bits8_from_int(244)), bits8_to_int(bits8_add(bits8_from_int(10), bits8_from_int(244)))); 
+    bits8_print(bits8_add(bits8_from_int(10), bits8_from_int(244))); printf(" : which equals -2 in TC");
+    printf("\nExpected return: byte10 - byte8 (TC) = 2 –––> got: %d + %d (TC) = %d = ", bits8_to_int(bits8_from_int(10)), bits8_to_int(bits8_from_int(248)), bits8_to_int(bits8_add(bits8_from_int(10), bits8_from_int(248)))); 
+    bits8_print(bits8_add(bits8_from_int(10), bits8_from_int(248))); printf(" : when overflowing works correctly???");
 
     // TASK 4
 
@@ -113,7 +113,7 @@ int main() {
     assert(bits8_to_int(bits8_negate(byte3)) == 253);
     assert(bits8_to_int(bits8_negate(byte133)) == 123);
 
-    printf("\nA few printed tests of bits8_negate:\n");
+    printf("\n\nA few printed tests of bits8_negate:\n");
     printf("Expected return: -1 * 1 = 255   –––> got: %d\n", bits8_to_int(bits8_negate(byte1))); 
     printf("Expected return: -1 * 3 = 253   –––> got: %d\n", bits8_to_int(bits8_negate(byte3))); 
     printf("Expected return: -1 * 133 = 123 –––> got: %d\n", bits8_to_int(bits8_negate(byte133)));
