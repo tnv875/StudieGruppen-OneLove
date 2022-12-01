@@ -1,4 +1,17 @@
+#include <stdint.h>
 #include "bits.h"
+
+// Can just as well be written in the library bits.h
+struct bits8 {
+  struct bit b0; // Least significant bit
+  struct bit b1;
+  struct bit b2;
+  struct bit b3;
+  struct bit b4;
+  struct bit b5;
+  struct bit b6;
+  struct bit b7;
+};
 
 
 // TASK 2

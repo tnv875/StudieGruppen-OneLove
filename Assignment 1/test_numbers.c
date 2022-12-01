@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "numbers.h"
 
 int main() {
@@ -61,15 +62,15 @@ int main() {
 
     printf("\nA few printed tests of bites8_from_int:\n");
     printf("Expected return: byte1 = 0000 0001   –––> got: "); bits8_print(byte1); 
-    printf("Expected return: byte133 = 1000 0101 –––> got: "); bits8_print(byte133);
-    printf("Expected return: byte255 = 1111 1111 –––> got: "); bits8_print(byte255);
+    printf("\nExpected return: byte133 = 1000 0101 –––> got: "); bits8_print(byte133);
+    printf("\nExpected return: byte255 = 1111 1111 –––> got: "); bits8_print(byte255);
 
     // set_bit 
     assert(set_bit(2, 0) == 3);
     assert(set_bit(2, 1) == 2); 
     assert(set_bit(2, 2) == 6);  
 
-    printf("\nA few printed tests of set_bit:\n");
+    printf("\n\nA few printed tests of set_bit:\n");
     printf("Expected return: set_bit(2,0) = 3 –––> got: set_bit(2,0) = %d\n", set_bit(2,0));
     printf("Expected return: set_bit(2,1) = 2 –––> got: set_bit(2,1) = %d\n", set_bit(2,1));
     printf("Expected return: set_bit(2,2) = 6 –––> got: set_bit(2,2) = %d\n", set_bit(2,2));
@@ -97,15 +98,6 @@ int main() {
     printf("Expected return: byte18 + byte3 = 21   –––> got: %d + %d = %d\n", bits8_to_int(byte18), bits8_to_int(byte3), bits8_to_int(bits8_add(byte18, byte3))); 
     printf("Expected return: byte1 + byte133 = 134 –––> got: %d + %d = %d\n", bits8_to_int(byte1), bits8_to_int(byte133), bits8_to_int(bits8_add(byte1, byte133))); 
 
-/*
-    printf("\nTesting if bits8_add provide “correct” results if you pass in negative numbers in twos complement representation:\n");
-    printf("Expected return: byte2 + byte249 = 251 –––> got: %d + %d = %d =", bits8_to_int(bits8_from_int(2)), bits8_to_int(bits8_from_int(249)), bits8_to_int(bits8_add(bits8_from_int(2), bits8_from_int(249)))); 
-    bits8_print(bits8_add(bits8_from_int(2), bits8_from_int(249)));
-
-    printf("Expected return: byte2 + byte-7 (TC) = -5 –––> got: %d + %d = %d =", bits8_to_int(bits8_from_int(2)), bits8_to_int(bits8_from_int(-249)), bits8_to_int(bits8_add(bits8_from_int(2), bits8_from_int(-249)))); 
-    bits8_print(bits8_add(bits8_from_int(2), bits8_from_int(-249)));
-*/ 
-
     // TASK 4
 
     // bits8_negate()
@@ -113,10 +105,10 @@ int main() {
     assert(bits8_to_int(bits8_negate(byte3)) == 253);
     assert(bits8_to_int(bits8_negate(byte133)) == 123);
 
-    printf("\nA few printed tests of bits8_negate:\n");
-    printf("Expected return: -1 * 1 = 255   –––> got: %d\n", bits8_to_int(bits8_negate(byte1))); 
-    printf("Expected return: -1 * 3 = 253   –––> got: %d\n", bits8_to_int(bits8_negate(byte3))); 
-    printf("Expected return: -1 * 133 = 123 –––> got: %d\n", bits8_to_int(bits8_negate(byte133)));
+    printf("\n\nA few printed tests of bits8_negate:\n");
+    printf("Expected return: -1 * 1 = -1 = 255 (TC)     –––> got: %d\n", bits8_to_int(bits8_negate(byte1))); 
+    printf("Expected return: -1 * 3 = -3 = 253 (TC)     –––> got: %d\n", bits8_to_int(bits8_negate(byte3))); 
+    printf("Expected return: -1 * 133 = -133 = 123 (TC) –––> got: %d\n", bits8_to_int(bits8_negate(byte133)));
 
 
     // TASK 5
@@ -128,21 +120,31 @@ int main() {
 
 
     printf("\nA few printed tests of bits8_mul:\n");
-    printf("Expected return: 5 * 3 = 15 –––> got: %d * %d = %d = ", bits8_to_int(byte5), bits8_to_int(byte3), 
+    printf("Expected return: 5 * 3 = 15   –––> got: %d * %d = %d = ", bits8_to_int(byte5), bits8_to_int(byte3), 
     bits8_to_int(bits8_mul(byte5, byte3))); bits8_print(bits8_mul(byte5, byte3));
-    printf("Expected return: 1 * 5 = 5  –––> got: %d * %d = %d = ", bits8_to_int(byte1), bits8_to_int(byte5), 
+    printf("\nExpected return: 1 * 5 = 5    –––> got: %d * %d = %d = ", bits8_to_int(byte1), bits8_to_int(byte5), 
     bits8_to_int(bits8_mul(byte1, byte5))); bits8_print(bits8_mul(byte1, byte5));
-    printf("Expected return: 3 * 18 = 54  –––> got: %d * %d = %d = ", bits8_to_int(byte3), bits8_to_int(byte18), 
+    printf("\nExpected return: 3 * 18 = 54  –––> got: %d * %d = %d = ", bits8_to_int(byte3), bits8_to_int(byte18), 
     bits8_to_int(bits8_mul(byte3, byte18))); bits8_print(bits8_mul(byte3, byte18));
 
+
+    // Test concerning the "Answers for questions"-section:
     
+    // Does bits8\_add() provide “correct” results if you pass in negative numbers in two’s complement representation?
+    printf("\n\nTesting if bits8_add provide “correct” results if you pass in negative numbers in twos complement representation:\n");
+    printf("Expected return: byte2 - byte6 (TC) = -4       –––> got: %d + %d (TC) = %d = ", bits8_to_int(bits8_from_int(2)), bits8_to_int(bits8_from_int(250)), bits8_to_int(bits8_add(bits8_from_int(2), bits8_from_int(250)))); 
+    bits8_print(bits8_add(bits8_from_int(2), bits8_from_int(250))); printf(" : which equals -4 in TC");
+    printf("\nExpected return: byte10 - byte12 (TC) = -2     –––> got: %d + %d (TC) = %d = ", bits8_to_int(bits8_from_int(10)), bits8_to_int(bits8_from_int(244)), bits8_to_int(bits8_add(bits8_from_int(10), bits8_from_int(244)))); 
+    bits8_print(bits8_add(bits8_from_int(10), bits8_from_int(244))); printf(" : which equals -2 in TC");
+    printf("\nExpected return: byte10 - byte8 (TC) = 2       –––> got: %d + %d (TC) = %d = ", bits8_to_int(bits8_from_int(10)), bits8_to_int(bits8_from_int(248)), bits8_to_int(bits8_add(bits8_from_int(10), bits8_from_int(248)))); 
+    bits8_print(bits8_add(bits8_from_int(10), bits8_from_int(248))); printf(" : works correctly due to overflowing");
+    printf("\nExpected return: byte133 - byte123 (TC) = 10   –––> got: %d + %d (TC) = %d = ", bits8_to_int(bits8_from_int(133)), bits8_to_int(bits8_from_int(133)), bits8_to_int(bits8_add(bits8_from_int(133), bits8_from_int(133)))); 
+    bits8_print(bits8_add(bits8_from_int(133), bits8_from_int(133))); printf(" : works correctly due to overflowing (ex. from comments in pdf)");
 
     // How would you implement a function bits8_sub() for subtracting 8-bit numbers?
-
-    printf("\nTesting the way we would implement bits8_sub:\n");
+    printf("\n\nTesting the way we would implement bits8_sub:\n");
     printf("Expected return: byte5 - byte1 = 4      –––> got: %d\n", bits8_to_int(bits8_add(byte5, bits8_negate(byte1)))); 
     printf("Expected return: byte1 - byte5 = -4     –––> got: %d (equals -4 in TC, i.e. 1111 1100)\n", bits8_to_int(bits8_add(byte1, bits8_negate(byte5)))); 
     printf("Expected return: byte133 - byte18 = 115 –––> got: %d\n", bits8_to_int(bits8_add(byte133, bits8_negate(byte18))));
     
 }
-
