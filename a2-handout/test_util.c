@@ -53,6 +53,8 @@ int main() {
     printf("Point %d in closest: %f %f\n", i, point[0], point[1]);
   } 
 
-  // Note to self: insert_if_closer correctly insert 
+  // Note to self: insert_if_closer correctly inserts points in empty
+  // spaces, but from then on does not correctly evaluate whether to update
+  // points
 }
  
