@@ -54,7 +54,7 @@ int main() {
   } 
 
   // Note to self: insert_if_closer correctly inserts points in empty
-  // spaces, but from then on does not correctly evaluate whether to update
-  // points
+  // spaces, but from then on does not correctly evaluate whether to 
+  // update based on distances
 }
  
