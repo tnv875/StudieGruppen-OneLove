@@ -33,7 +33,5 @@ int main() {
   int candidate = indexes[4];  
   insert_if_closer(k, d, points, closest, query, candidate);
     
-    
-    
-  printf("Hej");
+  printf("Hej\n");
 }
