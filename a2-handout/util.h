@@ -2,7 +2,7 @@
 #define KNN_UTIL_H
 
 // Compute the Euclidean distance between two d-dimensional points 'x'
-// and 'y'.  Usual formula:
+// and 'y'. Usual formula:
 //
 //
 // √( ∑ (x[i]-y[i])² )
