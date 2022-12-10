@@ -7,10 +7,10 @@
 
 
 int main() {
-  FILE *f_points = fopen("20_5.points", "r");
+  FILE *f_points = fopen("10_2.points", "r"); 
   assert(f_points != NULL);
   
-  FILE *f_indexes = fopen("5_5.indexes", "r");
+  FILE *f_indexes = fopen("10_2.indexes", "r");
   assert(f_indexes != NULL);
 
   int n, d, k;
@@ -27,11 +27,32 @@ int main() {
     closest[i] = -1;
   }
 
-  // use 4th point as our query
-  const double* query = &(points[4*d]);
+  // use 7th point as our query
+  const double* query = &(points[7*d]);
+      
+  insert_if_closer(k, d, points, closest, query, 3);
+  insert_if_closer(k, d, points, closest, query, 2);
+  insert_if_closer(k, d, points, closest, query, 1);
 
-  int candidate = indexes[4];  
-  insert_if_closer(k, d, points, closest, query, candidate);
+  // Print query
+  printf("Our query location: %f %f\n\n", query[0], query[1]);
+
+  // Print indexes in closest
+  printf("Indexes in 'closest': \n");
+  for (int i = 0; i < k; i++) {
+    printf("%d\n", closest[i]);
+  } 
+
+  // For nice print
+  printf("\n");
     
-  printf("Hej\n");
+  // Print points in closest
+  for (int i = 0; i < k; i++) {  
+    int ind = d * closest[i]; // multiply by d to fix dimensions
+    const double* point = &(points[ind]);
+    printf("Point %d in closest: %f %f\n", i, point[0], point[1]);
+  } 
+
+  // Note to self: insert_if_closer correctly insert 
 }
+ 
