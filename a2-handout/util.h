@@ -20,7 +20,7 @@ double distance(int d, const double *x, const double *y);
 // into 'points', or -1 to indicate the absence of an element.
 //
 // 'query' is the query point from which distances are computed.
-//
+// 
 // 'candidate' is the index of a point in 'points'.
 //
 // Updates 'closest' to contain 'candidate' if 'candidate' is closer
@@ -30,5 +30,4 @@ double distance(int d, const double *x, const double *y);
 int insert_if_closer(int k, int d,
                      const double *points, int *closest, const double *query,
                      int candidate);
-
 #endif

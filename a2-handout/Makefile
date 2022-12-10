@@ -4,6 +4,9 @@ LDFLAGS?=-lm
 
 all: knn-bruteforce knn-svg knn-kdtree knn-genpoints
 
+test_util: test_util.c io.o util.o
+	$(CC) -o test_util test_util.c io.o util.o -lm $(CFLAGS)
+
 knn-bruteforce: knn-bruteforce.o bruteforce.o io.o util.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
