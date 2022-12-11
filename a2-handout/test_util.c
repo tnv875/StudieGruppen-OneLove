@@ -33,12 +33,10 @@ int main() {
   insert_if_closer(k, d, points, closest, query, 2);
   insert_if_closer(k, d, points, closest, query, 3);
 
-  // Print query
+  // Print query and comparison points
   printf("\nOur query:\n");
   printf("Point 7: %f %f\n\n", query[0], query[1]);
-
   printf("Comparison points:\n");
-  // Print comparisons
   printf("Point 1: 0.202671 0.586538\n"); 
   printf("Point 2: 0.833359 0.954286\n"); 
   printf("Point 3: 0.146108 0.334634\n"); 
