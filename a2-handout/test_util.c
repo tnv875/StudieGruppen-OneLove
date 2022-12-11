@@ -6,6 +6,9 @@
 #include <assert.h>
 
 
+// Attention: Everytime we index into points[], we must multiply with d
+// For example, to get to point 3, we do &(points[3 * d])
+
 int main() {
   FILE *f_points = fopen("10_2.points", "r"); 
   assert(f_points != NULL);
@@ -35,18 +38,18 @@ int main() {
   printf("Point 7: %f %f\n\n", query[0], query[1]);
 
   printf("Comparison points:\n");
+  // Print comparisons
   printf("Point 1: 0.202671 0.586538\n"); 
   printf("Point 2: 0.833359 0.954286\n"); 
   printf("Point 3: 0.146108 0.334634\n"); 
 
   // Print indexes in closest
-  printf("Indexes in 'closest': \n");
+  printf("\nIndexes in 'closest': \n");
   for (int i = 0; i < k; i++) {
     printf("%d\n", closest[i]);
   } 
 
-  // For nice print
-  printf("\n");
+  printf("\nResults:\n");
     
   // Print points in closest
   for (int i = 0; i < k; i++) {  
@@ -55,7 +58,7 @@ int main() {
     printf("%d. in closest: %f %f\n", i, point[0], point[1]);
   } 
 
-  // Note to self: insert_if_closer correctly inserts points in empty
-  // spaces, but from then on does not correctly evaluate whether to 
-  // update based on distances
+  printf("\nExpected:\n");
+  printf("0. in closest: 0.202671 0.586538\n");
+  printf("1. in closest: 0.146108 0.334634\n");
 }

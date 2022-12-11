@@ -3,6 +3,9 @@
 #include <stdio.h>
 #include <assert.h>
 
+// Attention: Everytime we index into points[], we must multiply with d
+// For example, to get to point 3, we do &(points[3 * d])
+
 // √( ∑ (x[i]-y[i])² )
 double distance(int d, const double *x, const double *y) {
   double s = 0;
@@ -17,7 +20,7 @@ int insert_if_closer(int k, int d,
                      const double *query, int candidate) {
 
   // distance to candidate from query
-  double dist_candidate = distance(d, query, &(points[candidate*d])); 
+  double dist_candidate = distance(d, query, &(points[candidate * d])); 
   printf("candidate %d: dist_candidate: %f\n", candidate, dist_candidate);
 
   // furthest distance in closest seen so far
@@ -35,8 +38,8 @@ int insert_if_closer(int k, int d,
     // calculate distance between query and the i'th point 
     } else {
       int i_index = closest[i];
-      const double* i_point = &(points[i_index]);
-      double dist_i = distance(d, query, i_point); //check address
+      const double* i_point = &(points[i_index * d]);
+      double dist_i = distance(d, query, i_point);
 
       // check if we need to update furthest
       if (furthest < dist_i) {
