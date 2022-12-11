@@ -9,17 +9,11 @@
 int main() {
   FILE *f_points = fopen("10_2.points", "r"); 
   assert(f_points != NULL);
-  
-  FILE *f_indexes = fopen("10_2.indexes", "r");
-  assert(f_indexes != NULL);
 
   int n, d, k;
 
   const double* points = read_points(f_points, &n, &d);
   assert(points != NULL);
-
-  const int* indexes = read_indexes(f_indexes, &n, &k); 
-  assert(indexes != NULL);
 
   // init closest with -1 in each place
   int *closest = malloc(k * sizeof(int));
