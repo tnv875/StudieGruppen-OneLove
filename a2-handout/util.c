@@ -17,8 +17,8 @@ int insert_if_closer(int k, int d,
                      const double *query, int candidate) {
 
   // distance to candidate from query
-  // !! TODO: Check if address is correct. We think it is! :)
-  double dist_candidate = distance(d, query, &(points[candidate])); 
+  double dist_candidate = distance(d, query, &(points[candidate*d])); 
+  printf("candidate %d: dist_candidate: %f\n", candidate, dist_candidate);
 
   // furthest distance in closest seen so far
   double furthest = -1.0;

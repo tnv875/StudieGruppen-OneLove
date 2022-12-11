@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "bits.h": "c"
+        "bits.h": "c",
+        "stdio.h": "c",
+        "assert.h": "c"
     }
 }

@@ -50,8 +50,8 @@ int main() {
     
   // Print points in closest
   for (int i = 0; i < k; i++) {  
-    int ind = d * closest[i]; // multiply by d to fix dimensions
-    const double* point = &(points[ind]);
+    int ind = closest[i]; // multiply by d to fix dimensions
+    const double* point = &(points[d * ind]);
     printf("%d. in closest: %f %f\n", i, point[0], point[1]);
   } 
 
