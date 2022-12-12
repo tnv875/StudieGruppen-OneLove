@@ -36,15 +36,14 @@ int insert_if_closer(int k, int d,
       return 1;
       
     // calculate distance between query and the i'th point 
-    } else {
-      int i_index = closest[i];
-      const double* i_point = &(points[i_index * d]);
-      double dist_i = distance(d, query, i_point);
+    int i_index = closest[i];
+    const double* i_point = &(points[i_index * d]);
+    double dist_i = distance(d, query, i_point);
 
-      // check if we need to update furthest
-      if (furthest < dist_i) {
-        furthest = dist_i;
-        furthest_i = i;
+    // check if we need to update furthest
+    if (furthest < dist_i) {
+      furthest = dist_i;
+      furthest_i = i;
       }   
     }
   }
