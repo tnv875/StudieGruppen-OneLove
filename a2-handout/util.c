@@ -34,7 +34,7 @@ int insert_if_closer(int k, int d,
       closest[i] = candidate;
       printf("Trivial :p\n");
       return 1;
-      
+    } 
     // calculate distance between query and the i'th point 
     int i_index = closest[i];
     const double* i_point = &(points[i_index * d]);
@@ -44,8 +44,7 @@ int insert_if_closer(int k, int d,
     if (furthest < dist_i) {
       furthest = dist_i;
       furthest_i = i;
-      }   
-    }
+    }   
   }
 
   // inserts candidate in 'closest' if the distance to the candidate is smaller
