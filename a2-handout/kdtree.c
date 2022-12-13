@@ -21,7 +21,7 @@ struct kdtree {
 
 struct node* kdtree_create_node(int d, const double *points,
                                 int depth, int n, int *indexes) {
-  assert(0);
+  
 }
 
 struct kdtree *kdtree_create(int d, int n, const double *points) {

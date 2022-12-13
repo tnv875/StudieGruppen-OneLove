@@ -54,4 +54,3 @@ void hpps_quicksort(void *base, size_t nmemb, size_t size,
                     void *arg) {
   quicksort(base, size, compar, arg, 0, nmemb);
 }
-
