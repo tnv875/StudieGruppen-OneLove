@@ -21,8 +21,7 @@ int insert_if_closer(int k, int d,
 
   // distance to candidate from query
   double dist_candidate = distance(d, query, &(points[candidate * d])); 
-  printf("candidate %d: dist_candidate: %f\n", candidate, dist_candidate);
-
+  
   // furthest distance in closest seen so far
   double furthest = -1.0;
   int furthest_i = 0;
@@ -32,7 +31,6 @@ int insert_if_closer(int k, int d,
     // if closest has empty spaces, trivially insert candidate and return 1
     if (closest[i] == -1) {
       closest[i] = candidate;
-      printf("Trivial :p\n");
       return 1;
     } 
     // calculate distance between query and the i'th point 
