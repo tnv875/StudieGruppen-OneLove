@@ -75,6 +75,9 @@ struct node* kdtree_create_node(int d, const double *points,
     no.left  = kdtree_create_node(d, points, depth+1, n/2, indexes);
     no.right = kdtree_create_node(d, points, depth+1, n/2, indexes[n/2]);
   }
+
+  // finally return address of node
+  return &no;
 }
 
 struct kdtree *kdtree_create(int d, int n, const double *points) {
