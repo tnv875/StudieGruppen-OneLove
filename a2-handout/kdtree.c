@@ -19,31 +19,35 @@ struct kdtree {
   struct node* root;
 };
 
+// custom struct to allow passing of multiple arguments to compare 
 struct Arg {
   int axis;
   int d;
   const double *points;
 };
 
-int (*f)(const void *, const void *, void *);
-
+// comparison function to be passed to quicksort
 int compare_dim(const void* ia, const void* ib, void* iarg) {
   
   // dereferencing
-  const int *a = (const int *)ia;
-  const int *b = (const int *)ib;
+  int a = (int)ia;
+  int b = (int)ib;
   struct Arg *arg = (struct Arg *)iarg;
   int axis = arg->axis;
-  int points = arg->points;
+  const double *points = arg->points;
   int d = arg->d;
 
-  //TODO: use indexes to compare points
-  if (a[axis] < b[axis]) {
+  double coord_a = (&points)[a*d][axis];
+  double coord_b = (&points)[b*d][axis];
+
+  if (coord_a < coord_b) {
     return -1;
   }
   return 1;
 }
 
+// ugly stuff to allow passing function to quicksort
+int (*f)(const void *, const void *, void *);
 f = &compare_dim;
 
 struct node* kdtree_create_node(int d, const double *points,
@@ -52,16 +56,25 @@ struct node* kdtree_create_node(int d, const double *points,
   // pick axis to take median from, e.g. for d=2: y or x
   no.axis = depth % d;
 
-  // sort points (This might break indexes?)
-  // maybe we need to sort indexes based on point axes instead?
-  // will involve passing both axis and *points to comparison,
-  // might be accomplished through a struct?
+  // create arg struct for passing arguments to sorting function
   struct Arg arg;
   arg.axis = no.axis;
   arg.points = points;
   arg.d = d;
+
+  // sort indexes according to axis
   hpps_quicksort(indexes, n, (d * sizeof(double)), f, &arg);
-  const double *median = &(points)[n/2 * d];
+  
+  // pick median from sorted indexes
+  no.point_index = (&indexes)[n/2 * d];
+
+  // recursively create left- and right nodes, using median index n/2 
+  // to split indexes into left part and right part. Right part starts 
+  // at median.
+  if (n > 2) {
+    no.left  = kdtree_create_node(d, points, depth+1, n/2, indexes);
+    no.right = kdtree_create_node(d, points, depth+1, n/2, indexes[n/2]);
+  }
 }
 
 struct kdtree *kdtree_create(int d, int n, const double *points) {
