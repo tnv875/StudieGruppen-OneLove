@@ -19,14 +19,26 @@ struct kdtree {
   struct node* root;
 };
 
+struct Arg {
+  int axis;
+  int d;
+  const double *points;
+};
+
 int (*f)(const void *, const void *, void *);
 
-int compare_dim(const void* a, const void* b, void* axis) {
-  const double *ia = (const double *)a;
-  const double *ib = (const double *)b;
-  const int iaxis = (const int) axis;
+int compare_dim(const void* ia, const void* ib, void* iarg) {
+  
+  // dereferencing
+  const int *a = (const int *)ia;
+  const int *b = (const int *)ib;
+  struct Arg *arg = (struct Arg *)iarg;
+  int axis = arg->axis;
+  int points = arg->points;
+  int d = arg->d;
 
-  if (ia[iaxis] < ib[iaxis]) {
+  //TODO: use indexes to compare points
+  if (a[axis] < b[axis]) {
     return -1;
   }
   return 1;
@@ -44,7 +56,11 @@ struct node* kdtree_create_node(int d, const double *points,
   // maybe we need to sort indexes based on point axes instead?
   // will involve passing both axis and *points to comparison,
   // might be accomplished through a struct?
-  hpps_quicksort(points, n, (d * sizeof(double)), f, no.axis);
+  struct Arg arg;
+  arg.axis = no.axis;
+  arg.points = points;
+  arg.d = d;
+  hpps_quicksort(indexes, n, (d * sizeof(double)), f, &arg);
   const double *median = &(points)[n/2 * d];
 }
 
