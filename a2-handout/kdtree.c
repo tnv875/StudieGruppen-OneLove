@@ -27,12 +27,12 @@ struct Arg {
 };
 
 // comparison function to be passed to quicksort
-int compare_dim(const void* ia, const void* ib, void* iarg) {
+int compare_dim(const void* a_in, const void* b_in, void* arg_in) {
   
   // dereferencing
-  int a = (int)ia;
-  int b = (int)ib;
-  struct Arg *arg = (struct Arg *)iarg;
+  int a = (int)a_in;
+  int b = (int)b_in;
+  struct Arg *arg = (struct Arg *)arg_in;
   int axis = arg->axis;
   const double *points = arg->points;
   int d = arg->d;
