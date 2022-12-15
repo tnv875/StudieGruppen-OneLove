@@ -27,33 +27,31 @@ struct Arg {
 };
 
 // comparison function to be passed to quicksort
-int compare_dim(const void* a_in, const void* b_in, void* arg_in) {
+double compare_dim(const void* a, const void* b, void* arg) {
   
   // dereferencing
-  int a = (int)a_in;
-  int b = (int)b_in;
-  struct Arg *arg = (struct Arg *)arg_in;
-  int axis = arg->axis;
-  const double *points = arg->points;
-  int d = arg->d;
+  // l: left, r: right elm in array to be sorted
+  int l = *(int *)a; //converting void pointer to int pointer, then dereferencing to int
+  int r = *(int *)b;
+  int axis = ((struct Arg *)arg)->axis;
+  const double *points = ((struct Arg *)arg)->points;
+  int d = ((struct Arg *)arg)->d;
 
-  double coord_a = (&points)[a*d][axis];
-  double coord_b = (&points)[b*d][axis];
+  double coord_l = (&points)[l*d][axis];
+  double coord_r = (&points)[r*d][axis];
 
-  if (coord_a < coord_b) {
-    return -1;
-  }
-  return 1;
+  // if coord l is bigger: positive. Else: negative
+  return (coord_l - coord_r);
 }
 
 // ugly stuff to allow passing function to quicksort
-int (*f)(const void *, const void *, void *);
+double (*f)(const void *, const void *, void *);
 f = &compare_dim;
 
 struct node* kdtree_create_node(int d, const double *points,
                                 int depth, int n, int *indexes) {
   struct node no;
-  // pick axis to take median from, e.g. for d=2: y or x
+  // pick axis to take median from, e.g. for d=2: yzz or x
   no.axis = depth % d;
 
   // create arg struct for passing arguments to sorting function
@@ -99,7 +97,7 @@ struct kdtree *kdtree_create(int d, int n, const double *points) {
 }
 
 void kdtree_free_node(struct node *node) {
-  assert(0);
+  free(node);
 }
 
 void kdtree_free(struct kdtree *tree) {
