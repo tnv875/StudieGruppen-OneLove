@@ -58,8 +58,17 @@ int compare_axis(const void* a, const void* b, void* arg) {
 struct node* kdtree_create_node(int d, const double *points,
                                 int depth, int n, int *indexes) {
   struct node* no = malloc(sizeof(struct node));
+
   // pick axis to take median from, e.g. for d=2: y-axis or x-axis
   no->axis = depth % d;
+  
+  // Handle trivial case:
+  if (n < 2) {
+    no->point_index = indexes[0];
+    no->left = NULL;
+    no->right = NULL;
+    return no;
+  }
 
   // create arg struct for passing arguments to sorting function
   struct Arg* arg = malloc(sizeof(struct Arg));
@@ -85,14 +94,10 @@ struct node* kdtree_create_node(int d, const double *points,
   no->point_index = indexes[n/2];
 
   // recursively create left- and right nodes, using median index n/2 
-  // to split indexes into left part and right part.
-  if (n > 1) {
-    no->left  = kdtree_create_node(d, points, depth+1, n/2, indexes);
-    no->right = kdtree_create_node(d, points, depth+1, (n-1)/2, &(indexes[(n/2) + 1]));
-  } else {
-    no->left  = NULL;
-    no->right = NULL;
-  }
+  // to split indexes into left part and right part. (n-1) and (n/2) +1 is to even
+  // uneven splits
+  no->left = kdtree_create_node(d, points, depth+1, n/2, indexes);
+  no->right = kdtree_create_node(d, points, depth+1, (n-1)/2, &(indexes[(n/2) +1]));
 
   // finally return address of node
   return no;
