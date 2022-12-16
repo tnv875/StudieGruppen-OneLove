@@ -2,6 +2,8 @@
     "files.associations": {
         "bits.h": "c",
         "stdio.h": "c",
-        "assert.h": "c"
+        "assert.h": "c",
+        "kdtree.h": "c",
+        "stdlib.h": "c"
     }
 }

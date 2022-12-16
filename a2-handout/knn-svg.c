@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include <time.h>
+// #include <time.h>
 #include <stdint.h>
 
 void draw_points(int size, int n_points, double* points) {
@@ -101,7 +101,7 @@ int main(int argc, char** argv) {
     exit(1);
   }
 
-  srand(time(NULL));
+  // srand(time(NULL));
 
   FILE *points_f = fopen(argv[1], "r");
   assert(points_f != NULL);

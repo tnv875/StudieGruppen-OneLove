@@ -4,11 +4,15 @@ LDFLAGS?=-lm
 
 all: knn-bruteforce knn-svg knn-kdtree knn-genpoints
 
+
 bruteforce: bruteforce.c io.o util.o
 	$(CC) -o bruteforce bruteforce.c io.o util.o -lm $(CFLAGS)
 
 test_bruteforce: test_bruteforce.c bruteforce.o io.o util.o
 	$(CC) -o test_bruteforce test_bruteforce.c bruteforce.o io.o util.o -lm $(CFLAGS)
+
+test_kdtree: test_kdtree.c io.o util.o kdtree.o sort.o
+	$(CC) -o test_kdtree test_kdtree.c io.o util.o kdtree.o sort.o -lm $(CFLAGS)
 
 test_util: test_util.c io.o util.o
 	$(CC) -o test_util test_util.c io.o util.o -lm $(CFLAGS)
