@@ -40,13 +40,13 @@ int compare_axis(const void* a, const void* b, void* arg) {
   const double* points = ((struct Arg *)arg)->points;
   int d = ((struct Arg *)arg)->d;
 
-  double coord_l = points[l * d + axis];
-  double coord_r = points[r * d + axis];
+  double coord_l = points[(l * d) + axis];
+  double coord_r = points[(r * d) + axis];
   // printf("coord_l: %f", coord_l);
   // printf("axis: %d\n", axis);
   // printf("point_l: %f\n", point_l);
 
-  if (coord_l > coord_r) {
+  if (coord_l < coord_r) {
     return -1;
   } else {
     return 1;
@@ -79,16 +79,16 @@ struct node* kdtree_create_node(int d, const double *points,
   free(arg);
 
   // pick median from sorted indexes
+  // if n is even, this will be the higher of the two middle points. E.g:
+  // n=6,  n/2=3, 
+  // indexes[3] is then the higher of the two middle values, indexes[2] and indexes[3] 
   no->point_index = indexes[n/2];
 
   // recursively create left- and right nodes, using median index n/2 
-  // to split indexes into left part and right part. Right part starts 
-  // at median.
-  printf("n: %d\n", n);
-  printf("no->point_index: %d\n", no->point_index);
-  if (n > 0) {
-    no->left  = kdtree_create_node(d, points, (depth+1), (n/2), indexes);
-    no->right = kdtree_create_node(d, points, (depth+1), (n/2), &(indexes[n/2]));
+  // to split indexes into left part and right part.
+  if (n > 1) {
+    no->left  = kdtree_create_node(d, points, depth+1, n/2, indexes);
+    no->right = kdtree_create_node(d, points, depth+1, (n-1)/2, &(indexes[(n/2) + 1]));
   } else {
     no->left  = NULL;
     no->right = NULL;

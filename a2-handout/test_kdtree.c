@@ -35,5 +35,6 @@ int main() {
 //     printf("Point %d: %f\n", i, points[i*d]);
 //   }
   struct kdtree *tree = kdtree_create(d, n, points);
-  printf("Success! Adress of tree is: %p", (void *)tree);
+  printf("Success! Adress of tree is: %p\n", (void *)tree);
+  printf("%d", 3/2);
 }
