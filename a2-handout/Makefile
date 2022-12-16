@@ -5,6 +5,10 @@ LDFLAGS?=-lm
 all: knn-bruteforce knn-svg knn-kdtree knn-genpoints
 
 
+
+kdtree: kdtree.o util.o sort.o
+	$(CC) -o kdtree kdtree.c util.o sort.o -lm $(CFLAGS)
+
 bruteforce: bruteforce.c io.o util.o
 	$(CC) -o bruteforce bruteforce.c io.o util.o -lm $(CFLAGS)
 
