@@ -51,12 +51,11 @@ int compare_axis(const void* a, const void* b, void* arg) {
 
 struct node* kdtree_create_node(int d, const double *points,
                                 int depth, int n, int *indexes) {
-  // if (n == 0) {
-  //   return NULL;
-  // }
+  if (n == 0) {
+    return NULL;
+  }
   
   struct node* no = malloc(sizeof(struct node));
-  // printf("n = %d, &(indexes[n/2 +1]) = %p\n", n, (int*)&(indexes[n/2 +1]));
 
   // pick axis to take median from, e.g. for d=2: y-axis or x-axis
   no->axis = depth % d;
@@ -84,17 +83,13 @@ struct node* kdtree_create_node(int d, const double *points,
   // if n is even, this will be the higher of the two middle points. E.g:
   // n=6,  n/2=3, 
   // indexes[3] is then the higher of the two middle values, indexes[2] and indexes[3] 
-  no->point_index = indexes[n/2];  
+  no->point_index = indexes[(n-1)/2];  
 
   // recursively create left- and right nodes, using median index n/2 
   // to split indexes into left part and right part. (n-1) and (n/2) +1 is to handle
   // uneven and uneven splits
-  no->left =  kdtree_create_node(d, points, depth+1, n/2, indexes);
-  // if (n == 2) {
-  //   no->right = NULL;
-  //   return no;
-  // }
-  no->right = kdtree_create_node(d, points, depth+1, (n-1)/2, &(indexes[n/2 +1]));
+  no->left =  kdtree_create_node(d, points, depth+1, (n-1)/2, indexes);
+  no->right = kdtree_create_node(d, points, depth+1, n/2, &(indexes[(n-1)/2 +1]));
 
   // finally return address of node
   return no;
