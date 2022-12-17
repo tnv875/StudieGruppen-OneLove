@@ -8,7 +8,7 @@
 
 
 int main() {
-  FILE *f_points = fopen("10_2.points", "r"); 
+  FILE *f_points = fopen("100_2.points", "r"); 
   assert(f_points != NULL);
 
   int n, d;
@@ -35,6 +35,5 @@ int main() {
 //     printf("Point %d: %f\n", i, points[i*d]);
 //   }
   struct kdtree *tree = kdtree_create(d, n, points);
-  printf("Success! Adress of tree is: %p\n", (void *)tree);
-  printf("%d", 3/2);
+  printf("Success! Address of tree is: %p\n", (void *)tree);
 }

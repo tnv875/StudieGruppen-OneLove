@@ -33,8 +33,6 @@ int compare_axis(const void* a, const void* b, void* arg) {
   // dereferencing
   // l: left index, r: right index in list of indexes to be sorted
   int l = *(int *)a; //converting void pointer to int pointer, then dereferencing to int
-  // printf("l: %d\n", l);
-  // printf("r: %d\n", l);
   int r = *(int *)b;
   int axis = ((struct Arg *)arg)->axis;
   const double* points = ((struct Arg *)arg)->points;
@@ -42,26 +40,27 @@ int compare_axis(const void* a, const void* b, void* arg) {
 
   double coord_l = points[(l * d) + axis];
   double coord_r = points[(r * d) + axis];
-  // printf("coord_l: %f", coord_l);
-  // printf("axis: %d\n", axis);
-  // printf("point_l: %f\n", point_l);
 
   if (coord_l < coord_r) {
     return -1;
   } else {
     return 1;
   }
-  // return (*(int *)a - *(int *)b);
 }
 
 
 struct node* kdtree_create_node(int d, const double *points,
                                 int depth, int n, int *indexes) {
+  // if (n == 0) {
+  //   return NULL;
+  // }
+  
   struct node* no = malloc(sizeof(struct node));
+  // printf("n = %d, &(indexes[n/2 +1]) = %p\n", n, (int*)&(indexes[n/2 +1]));
 
   // pick axis to take median from, e.g. for d=2: y-axis or x-axis
   no->axis = depth % d;
-  
+
   // Handle trivial case:
   if (n < 2) {
     no->point_index = indexes[0];
@@ -72,18 +71,12 @@ struct node* kdtree_create_node(int d, const double *points,
 
   // create arg struct for passing arguments to sorting function
   struct Arg* arg = malloc(sizeof(struct Arg));
-  // printf("In test_kdtree before kdtree_create() is called\n");
-  // for (int i=0; i<n; i++) {
-  //   printf("Point %d: %f\n", i, points[i*d]);
-  // }
+  
   arg->axis = no->axis;
   arg->points = points;
   arg->d = d;
 
   // sort indexes according to axis
-  for (int i = 0; i<n; i++) {
-    printf("indexes[%d]: %d\n", i, indexes[i]);
-  }
   hpps_quicksort(indexes, n, sizeof(int), compare_axis, arg);
   free(arg);
 
@@ -91,30 +84,27 @@ struct node* kdtree_create_node(int d, const double *points,
   // if n is even, this will be the higher of the two middle points. E.g:
   // n=6,  n/2=3, 
   // indexes[3] is then the higher of the two middle values, indexes[2] and indexes[3] 
-  no->point_index = indexes[n/2];
+  no->point_index = indexes[n/2];  
 
   // recursively create left- and right nodes, using median index n/2 
-  // to split indexes into left part and right part. (n-1) and (n/2) +1 is to even
-  // uneven splits
-  no->left = kdtree_create_node(d, points, depth+1, n/2, indexes);
-  no->right = kdtree_create_node(d, points, depth+1, (n-1)/2, &(indexes[(n/2) +1]));
+  // to split indexes into left part and right part. (n-1) and (n/2) +1 is to handle
+  // uneven and uneven splits
+  no->left =  kdtree_create_node(d, points, depth+1, n/2, indexes);
+  // if (n == 2) {
+  //   no->right = NULL;
+  //   return no;
+  // }
+  no->right = kdtree_create_node(d, points, depth+1, (n-1)/2, &(indexes[n/2 +1]));
 
   // finally return address of node
   return no;
 }
 
 struct kdtree *kdtree_create(int d, int n, const double *points) {
-  // printf("In kdtree right when kdtree_create() is called\n");
-  // for (int i=0; i<n; i++) {
-  //   printf("Point %d: %f\n", i, points[i*d]);
-  // }
+
   struct kdtree *tree = malloc(sizeof(struct kdtree));
   tree->d = d;
   tree->points = points;
-  // printf("In kdtree after struct kdtree *tree is initialised with points\n");
-  // for (int i=0; i<n; i++) {
-  //   printf("tree->point %d: %f\n", i, tree->points[i*d]);
-  // }
 
   int *indexes = malloc(sizeof(int) * n);
 

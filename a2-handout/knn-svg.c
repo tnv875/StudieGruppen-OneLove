@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-// #include <time.h>
+#include <time.h>
 #include <stdint.h>
 
 void draw_points(int size, int n_points, double* points) {
