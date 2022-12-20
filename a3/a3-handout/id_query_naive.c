@@ -56,6 +56,7 @@ const struct record* lookup_naive(struct naive_data *data, int64_t needle) {
 
 }
 
+// input in terminal has to be the osm_id
 int main(int argc, char** argv) {
   return id_query_loop(argc, argv,
                     (mk_index_fn)mk_naive,
