@@ -15,12 +15,14 @@ struct index_record {
   const struct record *record;
 };
 
+
 // Has a pointer to an array of records (*irs) and an integer (n) 
 // representing the number of records in the array.
 struct indexed_data {
   struct index_record *irs;
   int n;
 };
+
 
 struct indexed_data* mk_indexed(struct record* rs, int n) {
   struct indexed_data* data = malloc(sizeof(struct indexed_data));
@@ -53,6 +55,7 @@ const struct record* lookup_indexed(struct indexed_data *data, int64_t needle){
   // If no match is found, the function returns NULL.
   return NULL;
 }
+
 
 // copied-ish from id_query_naive.c
 int main(int argc, char** argv) {
