@@ -9,53 +9,49 @@
 #include "record.h"
 #include "id_query.h"
 
-// OBS struct made in advance!
-// Has a pointer to an array of records (*rs) and an integer (n) 
+// "custom" struct
+struct index_record {
+  int64_t osm_id;
+  const struct record *record;
+};
+
+// Has a pointer to an array of records (*irs) and an integer (n) 
 // representing the number of records in the array.
-struct naive_data {
-  struct record *rs;
+struct indexed_data {
+  struct index_record *irs;
   int n;
 };
 
-// A function that produces an index, when called with an
-// array of records and the size of the array.
-struct naive_data* mk_naive(struct record* rs, int n) {
-
-  struct naive_data* data = malloc(sizeof(struct naive_data));
-
-  data->rs = rs;
-  data->n = n;
+struct indexed_data* mk_indexed(struct record* rs, int n) {
+  struct indexed_data* data = malloc(sizeof(struct indexed_data));
+  
+  data->irs->record = rs;
+  data->irs->osm_id = rs[n]->osm_id;
   
   return data;
 }
 
-void free_naive(struct naive_data* data) {
-  
-  free(data);
 
+void free_indexed(struct indexed_data* data) {
+  free(data);
 }
 
-// Look up an ID in an index produced by mk_index_fn.
-const struct record* lookup_naive(struct naive_data *data, int64_t needle) {
-  
-  // Iterates through the record array and returns the adress of a pointer to the record with the 
-  // matching ID if it is found.
-
-  // i < data->n ===> i has to be less than the number of records in the array
+const struct record* lookup_indexed(struct indexed_data *data, int64_t needle){
   for (int i = 0; i < (data->n); i++) {
-    if (data->rs[i].osm_id == needle) {
-      return &(data->rs[i]);
+    if (data->irs->osm_id == needle) {
+      return data->irs->record;
     }
   }
 
   // If no matching record is found, the function returns NULL.
   return NULL;
-
+  
 }
 
+// copied-ish from id_query_naive.c
 int main(int argc, char** argv) {
   return id_query_loop(argc, argv,
-                    (mk_index_fn)mk_naive,
-                    (free_index_fn)free_naive,
-                    (lookup_fn)lookup_naive);
+                    (mk_index_fn)mk_indexed,
+                    (free_index_fn)free_indexed,
+                    (lookup_fn)lookup_indexed);
 }
