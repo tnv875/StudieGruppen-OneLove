@@ -18,34 +18,34 @@ struct naive_data {
 };
 
 // TODO
+// A function that produces an index, when called with an
+// array of records and the size of the array.
 struct naive_data* mk_naive(struct record* rs, int n) {
 
-  // mk_index_fn* data_index = malloc(sizeof(mk_index_fn));
+  struct naive_data* data = malloc(sizeof(struct naive_data));
 
-  struct naive_data* data_n = malloc(sizeof(struct naive_data));
-
-  data_n->rs = rs;
-  data_n->n = n;
+  data->rs = rs;
+  data->n = n;
   
-  return data_n;
+  return data;
 }
 
 // TODO
 void free_naive(struct naive_data* data) {
   
-  free(data->rs);
   free(data);
 
 }
 
 // TODO
+// Look up an ID in an index produced by mk_index_fn.
 const struct record* lookup_naive(struct naive_data *data, int64_t needle) {
   
-  // Iterates through the record array and returns a (the adress of?) pointer to the record with the 
+  // Iterates through the record array and returns the adress of a pointer to the record with the 
   // matching ID if it is found.
 
   // i < data->n ===> i has to be less than the number of records in the array
-  for (int i = 0; i < data->n; i++) {
+  for (int i = 0; i < (data->n); i++) {
     if (data->rs[i].osm_id == needle) {
       return &(data->rs[i]);
     }

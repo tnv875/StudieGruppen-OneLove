@@ -19,84 +19,71 @@ struct kdtree {
   struct node* root;
 };
 
-// custom struct to allow passing of multiple arguments to compare_dim()
+// custom struct to allow passing of multiple arguments to compare 
 struct Arg {
   int axis;
   int d;
   const double *points;
 };
 
-
 // comparison function to be passed to quicksort
-int compare_axis(const void* a, const void* b, void* arg) {
+int compare_dim(const void* a_in, const void* b_in, void* arg_in) {
   
   // dereferencing
-  // l: left index, r: right index in list of indexes to be sorted
-  int l = *(int *)a; //converting void pointer to int pointer, then dereferencing to int
-  int r = *(int *)b;
-  int axis = ((struct Arg *)arg)->axis;
-  const double* points = ((struct Arg *)arg)->points;
-  int d = ((struct Arg *)arg)->d;
+  int a = (int)a_in;
+  int b = (int)b_in;
+  struct Arg *arg = (struct Arg *)arg_in;
+  int axis = arg->axis;
+  const double *points = arg->points;
+  int d = arg->d;
 
-  double coord_l = points[(l * d) + axis];
-  double coord_r = points[(r * d) + axis];
+  double coord_a = (&points)[a*d][axis];
+  double coord_b = (&points)[b*d][axis];
 
-  if (coord_l < coord_r) {
+  if (coord_a < coord_b) {
     return -1;
-  } else {
-    return 1;
   }
+  return 1;
 }
 
+// ugly stuff to allow passing function to quicksort
+int (*f)(const void *, const void *, void *);
+f = &compare_dim;
 
 struct node* kdtree_create_node(int d, const double *points,
                                 int depth, int n, int *indexes) {
-  if (n == 0) {
-    return NULL;
-  }
-  
-  struct node* no = malloc(sizeof(struct node));
-
-  // pick axis to take median from, e.g. for d=2: y-axis or x-axis
-  no->axis = depth % d;
-
-  // Handle trivial case:
-  if (n < 2) {
-    no->point_index = indexes[0];
-    no->left = NULL;
-    no->right = NULL;
-    return no;
-  }
+  struct node no;
+  // pick axis to take median from, e.g. for d=2: y or x
+  no.axis = depth % d;
 
   // create arg struct for passing arguments to sorting function
-  struct Arg* arg = malloc(sizeof(struct Arg));
-  
-  arg->axis = no->axis;
-  arg->points = points;
-  arg->d = d;
+  struct Arg arg;
+  arg.axis = no.axis;
+  arg.points = points;
+  arg.d = d;
 
   // sort indexes according to axis
-  hpps_quicksort(indexes, n, sizeof(int), compare_axis, arg);
-  free(arg);
-
+  hpps_quicksort(indexes, n, (d * sizeof(double)), f, &arg);
+  
   // pick median from sorted indexes
-  // if n is even, this will be the higher of the two middle points. E.g:
-  // n=6,  n/2=3, 
-  // indexes[3] is then the higher of the two middle values, indexes[2] and indexes[3] 
-  no->point_index = indexes[(n-1)/2];  
+  no.point_index = (&indexes)[n/2 * d];
 
   // recursively create left- and right nodes, using median index n/2 
-  // to split indexes into left part and right part. (n-1) and (n/2) +1 is to handle
-  // uneven and uneven splits
-  no->left =  kdtree_create_node(d, points, depth+1, (n-1)/2, indexes);
-  no->right = kdtree_create_node(d, points, depth+1, n/2, &(indexes[(n-1)/2 +1]));
-
+  // to split indexes into left part and right part. Right part starts 
+  // at median.
+  if (n > 2) {
+    no.left  = kdtree_create_node(d, points, depth+1, n/2, indexes);
+    no.right = kdtree_create_node(d, points, depth+1, n/2, indexes[n/2]);
+  }
+  
   // finally return address of node
-  return no;
+  return &no;
 }
 
 struct kdtree *kdtree_create(int d, int n, const double *points) {
-
+  if(d == -1){
+    return NULL;
+  }
   struct kdtree *tree = malloc(sizeof(struct kdtree));
   tree->d = d;
   tree->points = points;
@@ -106,20 +93,15 @@ struct kdtree *kdtree_create(int d, int n, const double *points) {
   for (int i = 0; i < n; i++) {
     indexes[i] = i;
   }
-
+  
   tree->root = kdtree_create_node(d, points, 0, n, indexes);
-
+  
   free(indexes);
-
   return tree;
 }
 
 void kdtree_free_node(struct node *node) {
-  if (node->left != NULL) {
-    kdtree_free_node(node->left);
-    kdtree_free_node(node->right);
-  }
-  free(node);
+  assert(0);
 }
 
 void kdtree_free(struct kdtree *tree) {
@@ -127,52 +109,11 @@ void kdtree_free(struct kdtree *tree) {
   free(tree);
 }
 
-
-
-void kdtree_knn_node(const struct kdtree *tree, int k, const double* query, int *closest, double *radius, const struct node *node) {
-
-  // Below I have tried to implement the pseudocode on p. 5 in assignment
-
-  if (node == NULL) {
-    return;
-  }
-
-  // Unpacking args
-  // - for tree
-  int d = tree->d;
-  const double* points = tree->points;
-
-  // - for node
-  int axis = node->axis;
-  int point_index = node->point_index;
-
-
-  insert_if_closer(k, d, points, closest, query, point_index);
-
-  //diff
-  const double* node_point = &(points[point_index * d]);
-  double diff = node_point[axis] - query[axis];
-
-
-  // Update radius
-  // closest[0] is index of furthest point currently in closest
-  // as closest is maintained in sorted state by insert_if_closer()
-  if (closest[0] != -1) {
-    const double* furthest = &(points[closest[0] * d]);
-    *radius = distance(d, furthest, query);
-  }
-
-  // fabs() returns absolute value of a double
-  if (diff >= 0.0 || *radius > fabs(diff)) {
-    kdtree_knn_node(tree, k, query, closest, radius, node->left);
-  }
-  if (diff <= 0.0 || *radius > fabs(diff)) {
-    kdtree_knn_node(tree, k, query, closest, radius, node->right);
-  }
+void kdtree_knn_node(const struct kdtree *tree, int k, const double* query,
+                     int *closest, double *radius,
+                     const struct node *node) {
+  assert(0);
 }
-
-
-
 
 int* kdtree_knn(const struct kdtree *tree, int k, const double* query) {
   int* closest = malloc(k * sizeof(int));
