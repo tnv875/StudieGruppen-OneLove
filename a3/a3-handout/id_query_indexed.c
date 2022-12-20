@@ -23,10 +23,12 @@ struct indexed_data {
 };
 
 struct indexed_data* mk_indexed(struct record* rs, int n) {
-  struct indexed_data* data = malloc(sizeof(struct indexed_data));
+  struct indexed_data* data = malloc(sizeof(struct indexed_data) * n);
   
-  data->irs->record = rs;
-  data->irs->osm_id = rs[n]->osm_id;
+  for (int i = 0; int < n; i++) {
+    data->irs[i]->record = rs[i];
+    data->irs[i]->osm_id = (&rs[i])->osm_id;
+  }
   
   return data;
 }
@@ -38,12 +40,12 @@ void free_indexed(struct indexed_data* data) {
 
 const struct record* lookup_indexed(struct indexed_data *data, int64_t needle){
   for (int i = 0; i < (data->n); i++) {
-    if (data->irs->osm_id == needle) {
-      return data->irs->record;
+    if (data->irs[i]->osm_id == needle) {
+      return data->irs[i]->record;
     }
   }
 
-  // If no matching record is found, the function returns NULL.
+  // If no match is found, the function returns NULL.
   return NULL;
   
 }
