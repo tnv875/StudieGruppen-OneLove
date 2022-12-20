@@ -23,31 +23,35 @@ struct indexed_data {
 };
 
 struct indexed_data* mk_indexed(struct record* rs, int n) {
-  struct indexed_data* data = malloc(sizeof(struct indexed_data) * n);
-  
-  for (int i = 0; int < n; i++) {
-    data->irs[i]->record = rs[i];
-    data->irs[i]->osm_id = (&rs[i])->osm_id;
+  struct indexed_data* data = malloc(sizeof(struct indexed_data));
+
+  data->irs = calloc(n, sizeof(struct index_record));
+  data->n = n;
+
+  for (int i=0; i < n; i++) {
+    data->irs[i].osm_id = rs[i].osm_id; 
+    data->irs[i].record = &rs[i]; 
   }
-  
+
   return data;
 }
 
 
 void free_indexed(struct indexed_data* data) {
+  free(data->irs);
   free(data);
 }
 
+
 const struct record* lookup_indexed(struct indexed_data *data, int64_t needle){
   for (int i = 0; i < (data->n); i++) {
-    if (data->irs[i]->osm_id == needle) {
-      return data->irs[i]->record;
+    if (data->irs[i].osm_id == needle) {
+      return data->irs[i].record;
     }
   }
 
   // If no match is found, the function returns NULL.
   return NULL;
-  
 }
 
 // copied-ish from id_query_naive.c
