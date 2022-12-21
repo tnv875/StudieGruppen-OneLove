@@ -4,6 +4,7 @@
         "stdio.h": "c",
         "assert.h": "c",
         "kdtree.h": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "record.h": "c"
     }
 }
