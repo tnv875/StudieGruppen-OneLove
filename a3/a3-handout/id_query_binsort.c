@@ -9,6 +9,7 @@
 #include "record.h"
 #include "id_query.h"
 
+
 // "custom" struct
 struct index_record {
   int64_t osm_id;
@@ -23,6 +24,8 @@ struct sorted_data {
   int n;
 };
 
+
+// Comparison function to compare id's of records
 int compare(const void* a, const void* b) {
   struct index_record* l = (struct index_record*)a;
   struct index_record* r = (struct index_record*)b;
@@ -34,6 +37,8 @@ int compare(const void* a, const void* b) {
 
 }
 
+
+// Sorts data using among other things "qsort" and our implemented comparison function 
 struct sorted_data* mk_binsort(struct record* rs, int n) {
   struct sorted_data* data = malloc(sizeof(struct sorted_data));
 
@@ -57,6 +62,7 @@ void free_indexed(struct sorted_data* data) {
 }
 
 
+// Binary search function to be used to lookup indexes below
 int binarySearch(struct index_record* array, int x, int low, int high) {
   // Repeat until the pointers low and high meet each other
   while (low <= high) {
@@ -74,7 +80,6 @@ int binarySearch(struct index_record* array, int x, int low, int high) {
 
   return -1;
 }
-
 
 
 const struct record* lookup_indexed(struct sorted_data *data, int64_t needle){
