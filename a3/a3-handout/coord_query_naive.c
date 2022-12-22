@@ -26,7 +26,6 @@ struct naive_data* mk_naive(struct record* rs, int n) {
 void free_naive(struct naive_data* data) {
   free(data->rs);
   free(data);
-
 }
 
 double distance(double x_lon, double x_lat, double y_lon, double y_lat) { 
@@ -35,9 +34,6 @@ double distance(double x_lon, double x_lat, double y_lon, double y_lat) {
 
 
 const struct record* lookup_naive(struct naive_data *data, double lon, double lat) {
-  double* coord = malloc(2*sizeof(double));
-  coord[0] = lon;
-  coord[1] = lat;
 
   double closest_dist = INFINITY; // index of closest record encountered so far
   int closest_i = -1; // index of closest record encountered so far
