@@ -38,7 +38,7 @@ def receive_from_client():
                         f"Message '{string_message}' received".encode())
 
                 # Uncomment this line to add a delay to message processing
-                # time.sleep(10)
+                time.sleep(10)
                 print(f"Server responded to '{connection_address}'")
 
                 # Respond to the request
