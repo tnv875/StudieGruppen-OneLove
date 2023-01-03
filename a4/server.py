@@ -2,10 +2,9 @@
 
 import math
 import os
+import re
 import socketserver
 import struct
-
-import regex
 
 # This is quick hack to get relative imports of a higher file working 
 if __package__ is None:
@@ -49,20 +48,19 @@ class RequestHandler(socketserver.StreamRequestHandler):
         calling more specific handling functions. Nothing is returned.
         """
         try:
-            # Read request
+            # Read message
             bytes_message: bytes = self.request.recv(MSG_MAX)
-
-
             string_message = bytes_message.decode('utf-8')
 
-            # TODO: Define request_lines with regex from start to first instance of [\r|\n]
-            # (den grønne linje). Tjek op på Regex syntax
-            request_lines: string = ""
+            # Grab first line of message
+            request_lines = string_message.split(sep="\n", maxsplit=1)[0]
 
-            # TODO: Fra start til første space
-            method: string = ""
+            # Decompose into method, url and protocol using .split() to split by space character
+            method, url, protocol = request_lines.split()
 
-            # TODO: Check om method er understøttet
+            # Assert method is supported
+            if method not in ["GET", "HEAD"]:
+                self.handle_error(STATUS_BAD_REQUEST, f"Method not supported")
 
             # TODO: Define header_lines from end of request_lines to first instance of 
             # [\r|\n][\r|\n]  (lilla del)
