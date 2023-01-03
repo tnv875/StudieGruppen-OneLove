@@ -5,6 +5,8 @@ import os
 import socketserver
 import struct
 
+import regex
+
 # This is quick hack to get relative imports of a higher file working 
 if __package__ is None:
     import sys
@@ -48,27 +50,28 @@ class RequestHandler(socketserver.StreamRequestHandler):
         """
         try:
             # Read request
-            bytes_message = self.request.recv(MSG_MAX)
+            bytes_message: bytes = self.request.recv(MSG_MAX)
 
-            # Extract request attributes
-            request_length = struct.unpack('!I', bytes_message[
-                0
-                :LEN_REQUEST_LENGTH
-            ])[0]
-            request = bytes_message[
-                LEN_REQUEST_LENGTH
-                :LEN_REQUEST_LENGTH + request_length
-            ]
 
-            # Validate message length
-            if len(request) != request_length:
-                self.handle_error(
-                    STATUS_MALFORMED,
-                    "Malformed request. Length of request does not match "
-                    "given length"
-                )
+            string_message = bytes_message.decode('utf-8')
 
-            self._handle_request(request)
+            # TODO: Define request_lines with regex from start to first instance of [\r|\n]
+            # (den grønne linje). Tjek op på Regex syntax
+            request_lines: string = ""
+
+            # TODO: Fra start til første space
+            method: string = ""
+
+            # TODO: Check om method er understøttet
+
+            # TODO: Define header_lines from end of request_lines to first instance of 
+            # [\r|\n][\r|\n]  (lilla del)
+            header_lines: string = ""
+
+            # TODO: Regex Entity body (gul del)
+            entity_body: string  = ""
+
+            self._handle_request(entity_body)
  
         # Always generate a response, this is the fallback for if all other
         # validation and handling fails. This is acceptable as a last resort,
