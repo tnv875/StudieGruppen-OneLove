@@ -53,28 +53,16 @@ class RequestHandler(socketserver.StreamRequestHandler):
             string_message: string = bytes_message.decode('utf-8')
             split_message = string_message.split(sep="\r\n")
 
-            # Grab first line of message
-            request_lines = split_message[0]
+            # Get request_lines using custom function
+            method, url, protocol = self._get_request_lines()
 
-            # Decompose into method, url and protocol using .split() to split by space character
-            method, url, protocol = request_lines.split()
-
-            # Assert request_lines are OK using custom function
-            if self.assert_request_lines(method, url, protocol) == -1:
-                return
-
-            # Define header_lines from end of request_lines until empty line is encountered,
-            # marking the end of the header_lines
-            i = 1
-            header_lines = []
-            while split_message[i] != "":
-                header_lines.append(split_message[i])
-                i += 1
-
+            # Get header_lines using custom function
+            header_lines, entity_body_i = self._get_header_lines()
+            
             # TODO: Handle individual headers
 
             # Define final lines as entity_body
-            entity_body = header_lines[i:]
+            entity_body = split_message[entity_body_i:]
 
             # TODO: Handle entity_body if entity_body is not empty.
  
@@ -86,27 +74,62 @@ class RequestHandler(socketserver.StreamRequestHandler):
             self.handle_error(STATUS_OTHER, f"Something went wrong. {e}")
 
 
-    # Custom function to assert request_lines are OK. Returns 0 if everything OK.
-    # TODO: Might need more assertions
-    def assert_request_lines(self, method, url, protocol):
+    # TODO: Might need more asserts
+    def _get_request_lines(self, split_message):
+        """
+        Custom function to get request_lines from split_message. 
+        Asserts that method, url and protocol are supported.
+        """
+        request_lines = split_message[0]
+
+        # Decompose into method, url and protocol using .split() to split by space character
+        method, url, protocol = request_lines.split()
+
+        # ASSERTS
         # - method is supported
         if method not in ["GET", "HEAD"]:
             self.handle_error(STATUS_BAD_REQUEST, f"Method not supported")
-            return -1
+            return
 
         # - url exists
         if not os.path.exists(url):
             self.handle_error(
                 STATUS_BAD_REQUEST,
-                f"Requested content {get_path} does not exist")
-            return -1
+                f"Requested content {url} does not exist")
+            return
 
         # - protocol is HTTP/1.1
         if protocol != "HTTP/1.1":
-            self.handle_error(STATUS_BAD_REQUEST, f"Protocol is {protocol}. HTTP/1.1 was expected.")
-            return -1
+            self.handle_error(
+                STATUS_BAD_REQUEST, 
+                f"Protocol is {protocol}. HTTP/1.1 was expected.")
+            return
         
-        return 0
+        return method, url, protocol
+
+    def _get_header_lines(self, split_message):
+        """
+        Custom function to get header_lines from split_message.
+        Returns tuple containing header_lines and i. i is used for getting
+        entity_body if it exists.
+        """
+        header_lines = []
+        i = 1
+        while split_message[i] != "":
+            header_lines.append(split_message[i])
+            i += 1
+        return (header_lines,i)
+
+    def handle_Host(self, host: string):
+        """
+        Custom function to handle header Host
+        """
+        # TODO: Could be upgraded to support servers that are not hosted locally
+        LOCAL_HOST = "127.0.0.1"
+        if host != LOCAL_HOST:
+            self.handle_error(STATUS_BAD_REQUEST, f"Invalid host")
+
+
 
     # TODO: DEPRECATED
     def _handle_request(self, request:bytes) -> None:
