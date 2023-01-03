@@ -16,11 +16,11 @@ if __package__ is None:
 from shared import *
 
 
-class ExerciseServer(socketserver.ThreadingTCPServer):
+class HTTPServer(socketserver.ThreadingTCPServer):
     def __init__(self, configs: dict, 
             request_handler_class: socketserver.StreamRequestHandler):
         """
-        Constructor for ExerciseServer.
+        Constructor for HTTPServer.
 
         configs(dict): Configuration dictionary of for the server. Must include
             entires for 'server_ip', and 'server_port'.
@@ -49,27 +49,34 @@ class RequestHandler(socketserver.StreamRequestHandler):
         """
         try:
             # Read message
-            bytes_message: bytes = self.request.recv(MSG_MAX)
-            string_message = bytes_message.decode('utf-8')
+            bytes_message: bytes   = self.request.recv(MSG_MAX)
+            string_message: string = bytes_message.decode('utf-8')
+            split_message = string_message.split(sep="\r\n")
 
             # Grab first line of message
-            request_lines = string_message.split(sep="\n", maxsplit=1)[0]
+            request_lines = split_message[0]
 
             # Decompose into method, url and protocol using .split() to split by space character
             method, url, protocol = request_lines.split()
 
-            # Assert method is supported
-            if method not in ["GET", "HEAD"]:
-                self.handle_error(STATUS_BAD_REQUEST, f"Method not supported")
+            # Assert request_lines are OK using custom function
+            if self.assert_request_lines(method, url, protocol) == -1:
+                return
 
-            # TODO: Define header_lines from end of request_lines to first instance of 
-            # [\r|\n][\r|\n]  (lilla del)
-            header_lines: string = ""
+            # Define header_lines from end of request_lines until empty line is encountered,
+            # marking the end of the header_lines
+            i = 1
+            header_lines = []
+            while split_message[i] != "\n":
+                header_lines.append(split_message[i])
+                i += 1
 
-            # TODO: Regex Entity body (gul del)
-            entity_body: string  = ""
+            # TODO: Handle individual headers
 
-            self._handle_request(entity_body)
+            # Define final lines as entity_body
+            entity_body = header_lines[i:]
+
+            # TODO: Handle entity_body if entity_body is not empty.
  
         # Always generate a response, this is the fallback for if all other
         # validation and handling fails. This is acceptable as a last resort,
@@ -78,6 +85,30 @@ class RequestHandler(socketserver.StreamRequestHandler):
         except Exception as e:
             self.handle_error(STATUS_OTHER, f"Something went wrong. {e}")
 
+
+    # Custom function to assert request_lines are OK. Returns 0 if everything OK.
+    # TODO: Might need more assertions
+    def assert_request_lines(self, method, url, protocol):
+        # - method is supported
+        if method not in ["GET", "HEAD"]:
+            self.handle_error(STATUS_BAD_REQUEST, f"Method not supported")
+            return -1
+
+        # - url exists
+        if not os.path.exists(url):
+            self.handle_error(
+                STATUS_BAD_REQUEST,
+                f"Requested content {get_path} does not exist")
+            return -1
+
+        # - protocol is HTTP/1.1
+        if protocol != "HTTP/1.1":
+            self.handle_error(STATUS_BAD_REQUEST, f"Protocol is {protocol}. HTTP/1.1 was expected.")
+            return -1
+        
+        return 0
+
+    # TODO: DEPRECATED
     def _handle_request(self, request:bytes) -> None:
         """
         Function to handle a 'get file' type request.
@@ -123,6 +154,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
         self._build_and_send_responses(STATUS_OK, data)
         return
 
+    # TODO: Needs to be updated for new _build_and_send_responses()
     def handle_error(self, status:int, msg_str: str) -> None:
         """
         Function to handle any errors that are encountered during request 
@@ -141,6 +173,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
 
         return
 
+    # TODO: Needs to be updated for HTTP version
     def _build_and_send_responses(self, status:int, to_send: bytes) \
             -> bytearray:
         """
@@ -210,7 +243,7 @@ if __name__ == "__main__":
 
     print(f"Starting server at: {configs['server_ip']}:"
         f"{configs['server_port']}")
-    with ExerciseServer(configs, RequestHandler) as exercise_server:
+    with HTTPServer(configs, RequestHandler) as exercise_server:
         try:
             exercise_server.serve_forever()
         finally:
