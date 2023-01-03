@@ -32,13 +32,15 @@ def receive_from_client():
                 bytes_message = connection.recv(MSG_MAX_SIZE)
                 if not bytes_message:
                     response = bytearray("No data received".encode())
+                elif (bytes_message.decode('utf-8') == "ping"):
+                    response = bytearray("pong".encode())
                 else:
                     string_message = bytes_message.decode('utf-8')
                     response = bytearray(
                         f"Message '{string_message}' received".encode())
 
                 # Uncomment this line to add a delay to message processing
-                time.sleep(10)
+                time.sleep(5)
                 print(f"Server responded to '{connection_address}'")
 
                 # Respond to the request
