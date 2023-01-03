@@ -9,6 +9,7 @@
 #include "record.h"
 #include "id_query.h"
 
+
 // "custom" struct
 struct index_record {
   int64_t osm_id;
