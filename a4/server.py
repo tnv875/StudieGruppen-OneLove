@@ -67,7 +67,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
             # marking the end of the header_lines
             i = 1
             header_lines = []
-            while split_message[i] != "\n":
+            while split_message[i] != "":
                 header_lines.append(split_message[i])
                 i += 1
 
