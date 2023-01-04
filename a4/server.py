@@ -60,6 +60,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
             header_lines, entity_body_i = self._get_header_lines()
             
             # TODO: Handle individual headers
+            header_response = self.handle_headers(header_lines)
 
             # Define final lines as entity_body
             entity_body = split_message[entity_body_i:]
@@ -120,6 +121,30 @@ class RequestHandler(socketserver.StreamRequestHandler):
             i += 1
         return (header_lines,i)
 
+    def handle_headers(self, header_lines):
+        header_dict = {}
+        for element in range(0, len(header_lines)):
+            name, value = header_lines[element].split(sep=": ")
+            header_dict.update({name: value})
+        
+        if "host" not in header_dict:
+            self.handle_error(STATUS_BAD_REQUEST, f"Missing a Host header field")
+        else:
+            self.handle_Host(header_dict.get("host"))
+        if "accept" in header_dict:
+            self.handle_accept(header_dict.get("accept"))
+        if "accept-encoding" in header_dict:
+            self.handle_Host(header_dict.get("host"))
+        if "connection" in header_dict:
+            self.handle_Host(header_dict.get("host"))
+        if "if-modified-since" in header_dict:
+            self.handle_Host(header_dict.get("host"))
+        if "if-unmodified-since" in header_dict:
+            self.handle_Host(header_dict.get("host"))
+        if "user-agent" in header_dict:
+            self.handle_Host(header_dict.get("host"))
+
+
     def handle_Host(self, host: string):
         """
         Custom function to handle header Host
@@ -129,7 +154,12 @@ class RequestHandler(socketserver.StreamRequestHandler):
         if host != LOCAL_HOST:
             self.handle_error(STATUS_BAD_REQUEST, f"Invalid host")
 
-
+    # TODO: Handle Accept
+    def handle_accept(self, accpet: string):
+        """
+        Method to handle accept in header
+        """
+        
 
     # TODO: DEPRECATED
     def _handle_request(self, request:bytes) -> None:
