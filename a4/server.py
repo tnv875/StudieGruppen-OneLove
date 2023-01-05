@@ -107,6 +107,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
         
         return method, url, protocol
 
+
     def _get_header_lines(self, split_message):
         """
         Custom function to get header_lines from split_message.
@@ -120,7 +121,8 @@ class RequestHandler(socketserver.StreamRequestHandler):
             i += 1
         return (header_lines,i)
 
-    def handle_Host(self, host: string):
+
+    def _handle_Host(self, host: string):
         """
         Custom function to handle header Host
         """

@@ -4,7 +4,7 @@ import string
 
 # Max length of any individual message. Note this has been arbitrarily set for
 # this assignment and is not meant to reflect any real world limit.
-MSG_MAX = 16 * 1024
+MSG_MAX = 1024 * 1024 # 1 MB
 
 # The fixed lengths of various message attributes
 LEN_REQUEST_LENGTH = 4
