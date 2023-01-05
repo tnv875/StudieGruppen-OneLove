@@ -160,8 +160,20 @@ class RequestHandler(socketserver.StreamRequestHandler):
     # TODO: Handle Accept
     def handle_accept(self, accept: string):
         """
-        Method to handle accept in header
+        Method to handle accept in header. Assumes an accept header is present in the file
         """
+
+        # From docs:
+        '''
+        If an Accept header field is present,
+        and if the server cannot send a response which is acceptable
+        according to the combined Accept field value, then the server SHOULD
+        send a 406 (not acceptable) response.'''
+
+        # TODO: Update to actually contain supported MIME types
+        supported = ['*/*', 'text/html']
+        if accept not in supported:
+            self.handle_error(STATUS_NOT_ACCEPTABLE_406, "Media type not acceptable")
         
 
     # TODO: DEPRECATED
