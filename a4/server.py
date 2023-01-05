@@ -172,6 +172,8 @@ class RequestHandler(socketserver.StreamRequestHandler):
 
         types = accept.split(sep= ", ")
 
+        hej = "hej"
+
         types_dict = {}
         for type_ in types:
             key, value = type_.split(sep=";", maxsplit=1)
