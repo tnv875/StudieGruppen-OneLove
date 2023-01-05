@@ -8,7 +8,7 @@ MSG_MAX = 1024 * 1024 # 1 MB
 
 # The fixed lengths of various message attributes
 LEN_REQUEST_LENGTH = 4
-LEN_RESPONSE_LENGTH = 4
+LEN_RESPONSE_LENGTH = 400
 LEN_STATUS = 4
 LEN_BLOCK_ID = 4
 LEN_BLOCKS_COUNT = 4

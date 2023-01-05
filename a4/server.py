@@ -1,12 +1,12 @@
 
 #!/bin/python3
-import datetime
 import locale
 import math
 import os
 import re
 import socketserver
 import struct
+from datetime import datetime
 
 # This is quick hack to get relative imports of a higher file working 
 if __package__ is None:
@@ -41,6 +41,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
     Custom handler to handle any inbound messages. Any input message will 
     ALWAYS receive an appropriate response.
     """
+        
 
     def handle(self):
         """
@@ -49,9 +50,8 @@ class RequestHandler(socketserver.StreamRequestHandler):
         This will read a request, perform some curseory validation before 
         calling more specific handling functions. Nothing is returned.
         """
-    
-        try:
 
+        try:
             self.status = 200 # OK
             self.response_headers = []
             self.message = ""
@@ -61,12 +61,9 @@ class RequestHandler(socketserver.StreamRequestHandler):
             now = datetime.now()
             date = now.strftime(self._date_format)
             self.response_headers.append(f'Date: {date}')
-
             # Generate Server Response Header
             self.ip = '127.0.0.1'
             self.response_headers.append(f'Server: {self.ip}')
-
-        
 
             # Read message
             bytes_message: bytes = self.request.recv(MSG_MAX)
@@ -74,15 +71,18 @@ class RequestHandler(socketserver.StreamRequestHandler):
             split_message = string_message.split(sep="\r\n")
 
             # Get request_lines using custom function
-            self.method, self.url, self.protocol = self._get_request_lines()
+            request_lines = split_message[0]
+
+            # Decompose into method, url and protocol using .split() to split by space character
+            self.method, self.url, self.protocol = self._get_request_lines(split_message)
+            self.url = '.' + self.url
 
             # Get header_lines using custom function
-            header_lines, entity_body_i = self._get_header_lines()
+            header_lines, entity_body_i = self._get_header_lines(split_message)
             
-            # TODO: Handle individual headers
-            header_response = self.handle_headers(header_lines)
+            self.handle_headers(header_lines)
 
-            # Define final lines as entity_body
+            # TODO: Handle entity_body if neededDefine final lines as entity_body
             entity_body = split_message[entity_body_i:]
 
             # TODO: Handle entity_body if entity_body is not empty.
@@ -90,7 +90,10 @@ class RequestHandler(socketserver.StreamRequestHandler):
             # Build and send HTTP_response
             if self.method == "GET":
                 self._handle_GET()
-            self._build_and_send_response()
+            elif self.method == "Head":
+                self._handle_HEAD()
+            else:
+                self._handle_error()
         
  
         # Always generate a response, this is the fallback for if all other
@@ -153,23 +156,48 @@ class RequestHandler(socketserver.StreamRequestHandler):
             name, value = header_lines[element].split(sep=": ")
             header_dict.update({name: value})
         
-        # TODO: Update handle_*() methods to correspond to individual headers. Check capitalization of header fields.
+
         if "Host" not in header_dict:
             self._handle_error(STATUS_BAD_REQUEST, f"Missing a Host header field")
+            print('Handled Host error')
         else:
             self.handle_Host(header_dict.get("Host"))
+            print('Handled Host')
+
+        # TODO: Fix self.handle_Accept() since it is currently broken. Then remove try/except below.
         if "Accept" in header_dict:
-            self.handle_Accept(header_dict.get("Accept"))
+            try:
+                self.handle_Accept(header_dict.get("Accept"))
+                print('Handled Accept')
+            except Exception as e:
+                print('Could not handle Accept')
+           
+        # TODO: Implement self.handle_Accept-Encoding()
         if "Accept-Encoding" in header_dict:
-            self.handle_Host(header_dict.get("Host"))
+            try:
+                self.handle_Accept-Encoding(header_dict.get("Accept-Encoding"))
+            except Exception as e:
+                print('Could not handle Accept-Encoding')
+
         if "Connection" in header_dict:
             self.handle_Connection(header_dict.get("Connection"))
+            print('Handled Connection')
+
+        # Note: This header is currently not included in test client request,
+        # thus it is correct to not handle right now.
         if "If-Modified-Since" in header_dict:
             self.handle_If_Modified_Since(header_dict.get("If-Modified-Since"))
+            print('Handled If-Modified-Since')
+
+         # Note: This header is currently not included in test client request,
+        # thus it is correct to not handle right now.
         if "if-Unmodified-since" in header_dict:
             self.handle_If_Unmodified_Since(header_dict.get("If-Unmodified-Since"))
-        if "User-agent" in header_dict:
+            print('Handled If-Unmodified-Since')
+        
+        if "User-Agent" in header_dict:
             self.handle_User_Agent(header_dict.get("User-Agent"))
+            print('Handled User-agent')
 
 
     def handle_Host(self, host: str):
@@ -251,9 +279,13 @@ class RequestHandler(socketserver.StreamRequestHandler):
         If succesful sets self.status to 200. This should be included
         in response to client.
         """
+        print('started handle_If_Modified_Since()')
         last_modified_secs = os.path.getmtime(self.url)
         last_modified_date = datetime.fromtimestamp(last_modified_secs)
         condition_date = datetime.strptime(If_Modified_Since, self._date_format)
+
+        print('condition_date:')
+        print(condition_date)
 
         # If modification date is older than condition
         if last_modified_date < condition_date:
@@ -315,13 +347,23 @@ class RequestHandler(socketserver.StreamRequestHandler):
         what went wrong.
         """
 
-        # Get file data as bytes
-        with open(self.url) as requested_file:
-            self.data = requested_file.read()
+        try:
+            print(self.url)
+            # If last char is '/', add index.html 
+            if self.url[-1] == '/':
+                self.url += 'index.html'
+            print(self.url)
+
+            with open(self.url) as requested_file:
+                self.data = requested_file.read()
+            print('succesfully read file')
+        except:
+            print('could not read file')
 
         # Send a response
         print(f'Sending requested data from {self.url}')
         self._build_and_send_response()
+        print('Made it here! <3')
         return
 
     def _handle_HEAD(self):
@@ -329,16 +371,20 @@ class RequestHandler(socketserver.StreamRequestHandler):
         return
 
     def _statusline(self):
-        return f"HTTP/1.1 {self.status} {self._humanStatus(self.status)}"
+        return f"HTTP/1.1 {self.status} {self._humanStatus()}"
 
 
     def _build_and_send_response(self, should_send_data = True):
 
         statusline = self._statusline()
+        # print(self.data)
 
         # Content length response header
-        content_length = len(bytes(self.data))
+        content_length = len(bytes(self.data, 'utf-8'))
+        print(content_length)
         self.response_headers.append(f'Content-Length: {content_length}')
+        print('self.response_headers')
+        print(self.response_headers)
 
         headers_str = '\r\n'.join(self.response_headers)
 
@@ -365,20 +411,11 @@ if __name__ == "__main__":
         "server_port": 12345,
     }    
     
-    # This check is not a formal requirement of the system but should let you 
-    # know if you've started your server in the wrong place. Do feel free to 
-    # change or remove this if you are wanting to use different data files
-    for f in ["tiny.txt", "hamlet.txt"]:
-        if not os.path.isfile(f): 
-            print(f"Server can't find expected data file {f}. Make sure you " + 
-                  "are starting the server with the files next to it in the " + 
-                  "directory")
-            exit(1)
-
     print(f"Starting server at: {configs['server_ip']}:"
         f"{configs['server_port']}")
     with HTTPServer(configs, RequestHandler) as exercise_server:
         try:
             exercise_server.serve_forever()
         finally:
+            print('Closing server')
             exercise_server.server_close()
