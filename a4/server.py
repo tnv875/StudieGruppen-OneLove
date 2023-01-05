@@ -161,7 +161,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
             self.handle_error(STATUS_BAD_REQUEST, f"Invalid host")
 
     # TODO: Handle Accept
-    def handle_accept(self, accpet: string):
+    def handle_accept(self, accept: string):
         """
         Method to handle accept in header. Assumes an accept header is present in the file
         """
