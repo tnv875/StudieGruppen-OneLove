@@ -112,8 +112,8 @@ class RequestHandler(socketserver.StreamRequestHandler):
     def _get_header_lines(self, split_message):
         """
         Custom function to get header_lines from split_message.
-        Returns tuple containing header_lines and i. i is used for getting
-        entity_body if it exists.
+        Returns tuple containing header_lines and i. i is used by caller
+        for getting entity_body if it exists.
         """
         header_lines = []
         i = 1
@@ -122,12 +122,14 @@ class RequestHandler(socketserver.StreamRequestHandler):
             i += 1
         return (header_lines,i)
 
+
     def handle_headers(self, header_lines):
         header_dict = {}
         for element in range(0, len(header_lines)):
             name, value = header_lines[element].split(sep=": ")
             header_dict.update({name: value})
         
+        # TODO: Update handle_*() methods to correspond to individual headers. Check capitalization of header fields.
         if "host" not in header_dict:
             self.handle_error(STATUS_BAD_REQUEST, f"Missing a Host header field")
         else:
@@ -156,7 +158,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
             self.handle_error(STATUS_BAD_REQUEST, f"Invalid host")
 
     # TODO: Handle Accept
-    def handle_accept(self, accpet: string):
+    def handle_accept(self, accept: string):
         """
         Method to handle accept in header
         """
