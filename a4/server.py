@@ -74,11 +74,11 @@ class RequestHandler(socketserver.StreamRequestHandler):
             request_lines = split_message[0]
 
             # Decompose into method, url and protocol using .split() to split by space character
-            self.method, self.url, self.protocol = self._get_request_lines(split_message)
+            self.method, self.url, self.protocol = self.get_request_lines(split_message)
             self.url = '.' + self.url
 
             # Get header_lines using custom function
-            header_lines, entity_body_i = self._get_header_lines(split_message)
+            header_lines, entity_body_i = self.get_header_lines(split_message)
             
             self.handle_headers(header_lines)
 
@@ -89,11 +89,11 @@ class RequestHandler(socketserver.StreamRequestHandler):
 
             # Build and send HTTP_response
             if self.method == "GET":
-                self._handle_GET()
+                self.handle_GET()
             elif self.method == "Head":
-                self._handle_HEAD()
+                self.handle_HEAD()
             else:
-                self._handle_error()
+                self.handle_error()
         
  
         # Always generate a response, this is the fallback for if all other
@@ -104,7 +104,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
             self.status = STATUS_OTHER        
 
     # TODO: Might need more asserts
-    def _get_request_lines(self, split_message):
+    def get_request_lines(self, split_message):
         """
         Custom function to get request_lines from split_message. 
         Asserts that method, url and protocol are supported.
@@ -118,25 +118,25 @@ class RequestHandler(socketserver.StreamRequestHandler):
         # - method is supported
         if method not in ["GET", "HEAD"]:
             self.status = 400
-            self._handle_error()
+            self.handle_error()
             return
 
         # - url exists
         if not os.path.exists(url):
             self.status = 400
-            self._handle_error()
+            self.handle_error()
             return
 
         # - protocol is HTTP/1.1
         if protocol != "HTTP/1.1":
             self.status = 400
-            self._handle_error()
+            self.handle_error()
             return
         
         return method, url, protocol
 
 
-    def _get_header_lines(self, split_message):
+    def get_header_lines(self, split_message):
         """
         Custom function to get header_lines from split_message.
         Returns tuple containing header_lines and i. i is used by caller
@@ -158,7 +158,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
         
 
         if "Host" not in header_dict:
-            self._handle_error(STATUS_BAD_REQUEST, f"Missing a Host header field")
+            self.handle_error(STATUS_BAD_REQUEST, f"Missing a Host header field")
             print('Handled Host error')
         else:
             self.handle_Host(header_dict.get("Host"))
@@ -207,7 +207,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
         # TODO: Could be upgraded to support servers that are not hosted locally
         if host != self.ip:
             self.status = 400
-            self._handle_error()
+            self.handle_error()
 
 
     # TODO: Handle Accept
@@ -244,7 +244,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
                 next
         if accepted_list == []:
             self.status = 406
-            self.__handle_error()
+            self.handle_error()
         else:
             final_dict = {}
             for elem in accepted_list:
@@ -290,7 +290,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
         # If modification date is older than condition
         if last_modified_date < condition_date:
             self.status = 304
-            self._handle_error()
+            self.handle_error()
             return
             
         else:
@@ -309,7 +309,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
         # If modification date is later than condition
         if last_modified_date > condition_date:
             self.status = 412
-            self._handle_error()
+            self.handle_error()
             return
         else:
             self.status = 200 # OK
@@ -324,7 +324,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
         return
 
 
-    def _humanStatus(self):
+    def human_status(self):
         """
         Get human readable status message from statuscode 
         """
@@ -338,7 +338,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
         }
         return status_messages[str(self.status)]
 
-    def _handle_GET(self) -> None:
+    def handle_GET(self) -> None:
         """
         Function to handle a 'get file' type request.
 
@@ -360,21 +360,21 @@ class RequestHandler(socketserver.StreamRequestHandler):
 
         # Send a response
         print(f'Sending requested data from {self.url}')
-        self._build_and_send_response()
+        self.build_and_send_response()
         print('Made it to the very end! <3')
         return
 
-    def _handle_HEAD(self):
-        self._build_and_send_response(should_send_data = False)
+    def handle_HEAD(self):
+        self.build_and_send_response(should_send_data = False)
         return
 
-    def _statusline(self):
-        return f"HTTP/1.1 {self.status} {self._humanStatus()}"
+    def gen_statusline(self):
+        return f"HTTP/1.1 {self.status} {self.human_status()}"
 
 
-    def _build_and_send_response(self, should_send_data = True):
+    def build_and_send_response(self, should_send_data = True):
 
-        statusline = self._statusline()
+        statusline = self.gen_statusline()
         # print(self.data)
 
         # Content length response header
@@ -396,9 +396,9 @@ class RequestHandler(socketserver.StreamRequestHandler):
 
 
     #TODO: Make sure this correctly interrupts the rest of the thread.
-    def _handle_error(self):
-        self.message = self._statusline() + "\r\n\r\n"
-        self._build_and_send_response()
+    def handle_error(self):
+        self.message = self.gen_statusline() + "\r\n\r\n"
+        self.build_and_send_response()
         return
 
 if __name__ == "__main__":
