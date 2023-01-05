@@ -100,21 +100,20 @@ class RequestHandler(socketserver.StreamRequestHandler):
         # ASSERTS
         # - method is supported
         if method not in ["GET", "HEAD"]:
-            self.handle_error(STATUS_BAD_REQUEST, f"Method not supported")
+            self.status = 400
+            self.handle_error()
             return
 
         # - url exists
         if not os.path.exists(url):
-            self.handle_error(
-                STATUS_BAD_REQUEST,
-                f"Requested content {url} does not exist")
+            self.status = 400
+            self.handle_error()
             return
 
         # - protocol is HTTP/1.1
         if protocol != "HTTP/1.1":
-            self.handle_error(
-                STATUS_BAD_REQUEST, 
-                f"Protocol is {protocol}. HTTP/1.1 was expected.")
+            self.status = 400
+            self.handle_error()
             return
         
         return method, url, protocol
@@ -166,7 +165,9 @@ class RequestHandler(socketserver.StreamRequestHandler):
         # TODO: Could be upgraded to support servers that are not hosted locally
         LOCAL_HOST = "127.0.0.1"
         if host != LOCAL_HOST:
-            self.handle_error(STATUS_BAD_REQUEST, f"Invalid host")
+            self.status = 400
+            self.handle_error()
+
 
     # TODO: Handle Accept
     def handle_accept(self, accept: str):
@@ -201,7 +202,8 @@ class RequestHandler(socketserver.StreamRequestHandler):
             else:
                 next
         if accepted_list == []:
-            self.handle_error(STATUS_NOT_ACCEPTABLE_406, "Media types are not acceptable")
+            self.status = 406
+            self._handle_error()
         else:
             final_dict = {}
             for elem in accepted_list:
@@ -239,7 +241,8 @@ class RequestHandler(socketserver.StreamRequestHandler):
 
         # If modification date is older than condition
         if last_modified_date < condition_date:
-            self.handle_error(STATUS_NOT_MODIFIED_304, "File not modified")
+            self.status = 304
+            self.handle_error()
             return
             
         else:
@@ -257,7 +260,8 @@ class RequestHandler(socketserver.StreamRequestHandler):
 
         # If modification date is later than condition
         if last_modified_date > condition_date:
-            self.handle_error(STATUS_MODIFIED_412, "File modified")
+            self.status = 412
+            self.handle_error()
             return
         else:
             self.status = 200 # OK
@@ -268,7 +272,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
         Method for handleing user-agent header type.
         Will always succeed.
         """
-        #user_agent is nearly allways  == "Mozilla/5.0" at least for all testcases, and as such we will always return success.
+        #user_agent is nearly always  == "Mozilla/5.0" at least for all testcases, and as such we will always return success.
         return
 
 
