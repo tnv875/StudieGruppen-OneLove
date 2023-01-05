@@ -49,11 +49,25 @@ class RequestHandler(socketserver.StreamRequestHandler):
         This will read a request, perform some curseory validation before 
         calling more specific handling functions. Nothing is returned.
         """
-
-        self.status = STATUS_OK
-        self.message = ""
-        
+    
         try:
+
+            self.status = 200 # OK
+            self.response_headers = []
+            self.message = ""
+
+            # Generate Date Response Header
+            self._date_format = '%a, %d %b %Y %H:%M:%S GMT'
+            now = datetime.now()
+            date = now.strftime(self._date_format)
+            self.response_headers.append(f'Date: {date}')
+
+            # Generate Server Response Header
+            self.ip = '127.0.0.1'
+            self.response_headers.append(f'Server: {self.ip}')
+
+        
+
             # Read message
             bytes_message: bytes = self.request.recv(MSG_MAX)
             string_message: str = bytes_message.decode('utf-8')
@@ -76,7 +90,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
             # Build and send HTTP_response
             if self.method == "GET":
                 self._handle_GET()
-            self._send_response()
+            self._build_and_send_response()
         
  
         # Always generate a response, this is the fallback for if all other
@@ -100,21 +114,20 @@ class RequestHandler(socketserver.StreamRequestHandler):
         # ASSERTS
         # - method is supported
         if method not in ["GET", "HEAD"]:
-            self.handle_error(STATUS_BAD_REQUEST, f"Method not supported")
+            self.status = 400
+            self._handle_error()
             return
 
         # - url exists
         if not os.path.exists(url):
-            self.handle_error(
-                STATUS_BAD_REQUEST,
-                f"Requested content {url} does not exist")
+            self.status = 400
+            self._handle_error()
             return
 
         # - protocol is HTTP/1.1
         if protocol != "HTTP/1.1":
-            self.handle_error(
-                STATUS_BAD_REQUEST, 
-                f"Protocol is {protocol}. HTTP/1.1 was expected.")
+            self.status = 400
+            self._handle_error()
             return
         
         return method, url, protocol
@@ -141,22 +154,22 @@ class RequestHandler(socketserver.StreamRequestHandler):
             header_dict.update({name: value})
         
         # TODO: Update handle_*() methods to correspond to individual headers. Check capitalization of header fields.
-        if "host" not in header_dict:
-            self.handle_error(STATUS_BAD_REQUEST, f"Missing a Host header field")
+        if "Host" not in header_dict:
+            self._handle_error(STATUS_BAD_REQUEST, f"Missing a Host header field")
         else:
-            self.handle_Host(header_dict.get("host"))
-        if "accept" in header_dict:
-            self.handle_accept(header_dict.get("accept"))
-        if "accept-encoding" in header_dict:
-            self.handle_Host(header_dict.get("host"))
+            self.handle_Host(header_dict.get("Host"))
+        if "Accept" in header_dict:
+            self.handle_Accept(header_dict.get("Accept"))
+        if "Accept-Encoding" in header_dict:
+            self.handle_Host(header_dict.get("Host"))
         if "Connection" in header_dict:
             self.handle_Connection(header_dict.get("Connection"))
         if "If-Modified-Since" in header_dict:
             self.handle_If_Modified_Since(header_dict.get("If-Modified-Since"))
         if "if-Unmodified-since" in header_dict:
             self.handle_If_Unmodified_Since(header_dict.get("If-Unmodified-Since"))
-        if "user-agent" in header_dict:
-            self.handle_user_agent(header_dict.get("user-agent"))
+        if "User-agent" in header_dict:
+            self.handle_User_Agent(header_dict.get("User-Agent"))
 
 
     def handle_Host(self, host: str):
@@ -164,12 +177,13 @@ class RequestHandler(socketserver.StreamRequestHandler):
         Custom function to handle header Host
         """
         # TODO: Could be upgraded to support servers that are not hosted locally
-        LOCAL_HOST = "127.0.0.1"
-        if host != LOCAL_HOST:
-            self.handle_error(STATUS_BAD_REQUEST, f"Invalid host")
+        if host != self.ip:
+            self.status = 400
+            self._handle_error()
+
 
     # TODO: Handle Accept
-    def handle_accept(self, accept: str):
+    def handle_Accept(self, accept: str):
         """
         Method to handle accept in header. Assumes an accept header is present in the file
         """
@@ -201,7 +215,8 @@ class RequestHandler(socketserver.StreamRequestHandler):
             else:
                 next
         if accepted_list == []:
-            self.handle_error(STATUS_NOT_ACCEPTABLE_406, "Media types are not acceptable")
+            self.status = 406
+            self.__handle_error()
         else:
             final_dict = {}
             for elem in accepted_list:
@@ -225,6 +240,9 @@ class RequestHandler(socketserver.StreamRequestHandler):
         variable to close the connection after response has been processed.
         """
         self.Connection = Connection
+        
+        #Add Connection response to output header
+        self.response_headers.append(f'Connection: {Connection}')
 
 
     def handle_If_Modified_Since(self, If_Modified_Since: str):
@@ -235,11 +253,12 @@ class RequestHandler(socketserver.StreamRequestHandler):
         """
         last_modified_secs = os.path.getmtime(self.url)
         last_modified_date = datetime.fromtimestamp(last_modified_secs)
-        condition_date = datetime.strptime(If_Modified_Since, '%a, %d %b %Y %H:%M:%S GMT')
+        condition_date = datetime.strptime(If_Modified_Since, self._date_format)
 
         # If modification date is older than condition
         if last_modified_date < condition_date:
-            self.handle_error(STATUS_NOT_MODIFIED_304, "File not modified")
+            self.status = 304
+            self._handle_error()
             return
             
         else:
@@ -257,18 +276,19 @@ class RequestHandler(socketserver.StreamRequestHandler):
 
         # If modification date is later than condition
         if last_modified_date > condition_date:
-            self.handle_error(STATUS_MODIFIED_412, "File modified")
+            self.status = 412
+            self._handle_error()
             return
         else:
             self.status = 200 # OK
 
 
-    def handle_user_agent(self, user_agent: str):
+    def handle_User_Agent(self, user_agent: str):
         """
         Method for handleing user-agent header type.
         Will always succeed.
         """
-        #user_agent is nearly allways  == "Mozilla/5.0" at least for all testcases, and as such we will always return success.
+        #user_agent is nearly always  == "Mozilla/5.0" at least for all testcases, and as such we will always return success.
         return
 
 
@@ -286,10 +306,9 @@ class RequestHandler(socketserver.StreamRequestHandler):
         }
         return status_messages[str(self.status)]
 
-    def _handle_GET(self, request:bytes) -> None:
+    def _handle_GET(self) -> None:
         """
         Function to handle a 'get file' type request.
-        request(bytes): The request message body
 
         A data file is read and sent back to the requestee. A response is 
         always generated, either the data file or an error message explaining 
@@ -298,31 +317,46 @@ class RequestHandler(socketserver.StreamRequestHandler):
 
         # Get file data as bytes
         with open(self.url) as requested_file:
-            data = requested_file.read()
-
-        statusline = self._statusline()
-
-        # TODO: figure out the headers to include in response (pass is a placeholder)
-        self.response_headers_list = []
-        response_headers = '\r\n'.join(self.response_headers_list)
-
-        self.message = '\r\n'.join([statusline, response_headers, '', data])
+            self.data = requested_file.read()
 
         # Send a response
         print(f'Sending requested data from {self.url}')
-        self._send_response()
+        self._build_and_send_response()
+        return
+
+    def _handle_HEAD(self):
+        self._build_and_send_response(should_send_data = False)
         return
 
     def _statusline(self):
         return f"HTTP/1.1 {self.status} {self._humanStatus(self.status)}"
 
-    def _send_response(self):
+
+    def _build_and_send_response(self, should_send_data = True):
+
+        statusline = self._statusline()
+
+        # Content length response header
+        content_length = len(bytes(self.data))
+        self.response_headers.append(f'Content-Length: {content_length}')
+
+        headers_str = '\r\n'.join(self.response_headers)
+
+        if not should_send_data:
+            self.data = ""
+
+        self.message = '\r\n'.join([statusline, headers_str, '', self.data])
+
         bytes_message = bytes(self.message, 'utf-8')
         self.request.sendall(bytes_message)
+        if self.Connection == 'close':
+            print("Closing since client asked me to")
+            self.server.server_close()
+
 
     def _handle_error(self):
         self.message = self._statusline() + "\r\n\r\n"
-        self._send_response()
+        self._build_and_send_response()
         return
 
 if __name__ == "__main__":
