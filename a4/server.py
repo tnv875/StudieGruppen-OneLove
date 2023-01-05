@@ -140,22 +140,22 @@ class RequestHandler(socketserver.StreamRequestHandler):
             header_dict.update({name: value})
         
         # TODO: Update handle_*() methods to correspond to individual headers. Check capitalization of header fields.
-        if "host" not in header_dict:
+        if "Host" not in header_dict:
             self.handle_error(STATUS_BAD_REQUEST, f"Missing a Host header field")
         else:
-            self.handle_Host(header_dict.get("host"))
-        if "accept" in header_dict:
-            self.handle_accept(header_dict.get("accept"))
-        if "accept-encoding" in header_dict:
-            self.handle_Host(header_dict.get("host"))
+            self.handle_Host(header_dict.get("Host"))
+        if "Accept" in header_dict:
+            self.handle_Accept(header_dict.get("Accept"))
+        if "Accept-Encoding" in header_dict:
+            self.handle_Host(header_dict.get("Host"))
         if "Connection" in header_dict:
             self.handle_Connection(header_dict.get("Connection"))
         if "If-Modified-Since" in header_dict:
             self.handle_If_Modified_Since(header_dict.get("If-Modified-Since"))
         if "if-Unmodified-since" in header_dict:
             self.handle_If_Unmodified_Since(header_dict.get("If-Unmodified-Since"))
-        if "user-agent" in header_dict:
-            self.handle_user_agent(header_dict.get("user-agent"))
+        if "User-agent" in header_dict:
+            self.handle_User_Agent(header_dict.get("User-Agent"))
 
 
     def handle_Host(self, host: str):
