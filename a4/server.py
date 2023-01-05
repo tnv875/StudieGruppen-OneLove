@@ -108,7 +108,6 @@ class RequestHandler(socketserver.StreamRequestHandler):
         
         return method, url, protocol
 
-
     def _get_header_lines(self, split_message):
         """
         Custom function to get header_lines from split_message.
@@ -156,11 +155,19 @@ class RequestHandler(socketserver.StreamRequestHandler):
             self.handle_error(STATUS_BAD_REQUEST, f"Invalid host")
 
     # TODO: Handle Accept
-    def handle_accept(self, accpet: string):
+    def handle_accept(self, accept: string):
         """
         Method to handle accept in header
         """
+        types_subtypes = {"*": "*", "audio" : ["mpeg", "vorbis"], } 
         
+        MIME_type, MIME_subtype = accept.split(sep="/")
+        if MIME_type in types_subtypes:
+            if MIME_subtype in types_subtypes[MIME_subtype]:
+
+
+
+
 
     # TODO: DEPRECATED
     def _handle_request(self, request:bytes) -> None:
