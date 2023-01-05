@@ -49,9 +49,13 @@ class RequestHandler(socketserver.StreamRequestHandler):
         This will read a request, perform some curseory validation before 
         calling more specific handling functions. Nothing is returned.
         """
+
+        self.status = STATUS_OK
+        self.message = ""
+        
         try:
             # Read message
-            bytes_message: bytes   = self.request.recv(MSG_MAX)
+            bytes_message: bytes = self.request.recv(MSG_MAX)
             string_message: str = bytes_message.decode('utf-8')
             split_message = string_message.split(sep="\r\n")
 
@@ -69,6 +73,10 @@ class RequestHandler(socketserver.StreamRequestHandler):
 
             # TODO: Handle entity_body if entity_body is not empty.
 
+            # Build and send HTTP_response
+            if self.method == "GET":
+                self._handle_GET()
+            self._send_response()
         
  
         # Always generate a response, this is the fallback for if all other
@@ -76,8 +84,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
         # but were possible more helpful feedback and responses should be 
         # generated.
         except Exception as e:
-            self.handle_error(STATUS_OTHER, f"Something went wrong. {e}")
-
+            self.status = STATUS_OTHER        
 
     # TODO: Might need more asserts
     def _get_request_lines(self, split_message):
@@ -111,6 +118,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
             return
         
         return method, url, protocol
+
 
     def _get_header_lines(self, split_message):
         """
@@ -216,8 +224,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
         Sets self.server_should_close to True. Caller should use this
         variable to close the connection after response has been processed.
         """
-        if Connection == "close":
-            self.server_should_close = True
+        self.Connection = Connection
 
 
     def handle_If_Modified_Since(self, If_Modified_Since: str):
@@ -239,8 +246,21 @@ class RequestHandler(socketserver.StreamRequestHandler):
             self.status = 200 # OK
 
 
-    # TODO: DEPRECATED
-    def _handle_request(self, request:bytes) -> None:
+    def _humanStatus(self):
+        """
+        Get human readable status message from statuscode 
+        """
+        status_messages = {
+            "200": "OK",
+            "301": "Moved Permanently",
+            "304": "Not Modified",
+            "404": "Not found",
+            "406": "Not Acceptable",
+            "412": "Modified"
+        }
+        return status_messages[str(self.status)]
+
+    def _handle_GET(self, request:bytes) -> None:
         """
         Function to handle a 'get file' type request.
         request(bytes): The request message body
@@ -250,111 +270,34 @@ class RequestHandler(socketserver.StreamRequestHandler):
         what went wrong.
         """
 
-        get_path = request.decode("utf-8")
-
-        # Process domain from top header line. If it starts with a path
-        # separator, remove it. Without doing this the path will go to the root
-        # directory of the server host, rather than the servers base folder.
-        if get_path[0] == os.path.sep:
-            get_path = get_path[1:]
-
-        # Report a request for missing data
-        if not os.path.exists(get_path):
-            self.handle_error(
-                STATUS_BAD_REQUEST,
-                f"Requested content {get_path} does not exist")
-            return
-
-        data = ""
-
-        # Report request for nonsense data
-        if not os.path.isfile(get_path):
-            self.handle_error(
-                STATUS_BAD_REQUEST,
-                f"Request URI {get_path} is not a file")
-            return
-
         # Get file data as bytes
-        with open(get_path) as requested_file:
+        with open(self.url) as requested_file:
             data = requested_file.read()
-        if type(data) != bytes:
-            data = bytes(data, "utf-8")
+
+        statusline = self._statusline()
+
+        # TODO: figure out the headers to include in response (pass is a placeholder)
+        self.response_headers_list = []
+        response_headers = '\r\n'.join(self.response_headers_list)
+
+        self.message = '\r\n'.join([statusline, response_headers, '', data])
 
         # Send a response
-        print(f'Sending requested data from {get_path}')
-        self._build_and_send_responses(STATUS_OK, data)
+        print(f'Sending requested data from {self.url}')
+        self._send_response()
         return
 
-    # TODO: Needs to be updated for new _build_and_send_responses()
-    def handle_error(self, status:int, msg_str: str) -> None:
-        """
-        Function to handle any errors that are encountered during request 
-        handling and response processing. 
-        
-        status(int): A status code describing the error encountered.
-        msg_str(str): A more descriptive response detailing exactly what went 
-            wrong
+    def _statusline(self):
+        return f"HTTP/1.1 {self.status} {self._humanStatus(self.status)}"
 
-        Will print a message to the server command line, and return an 
-        appropriate response to the requesting client.        
-        """
-        print(msg_str)
- 
-        self._build_and_send_responses(status, bytes(msg_str, "utf-8"))
+    def _send_response(self):
+        bytes_message = bytes(self.message, 'utf-8')
+        self.request.sendall(bytes_message)
 
+    def _handle_error(self):
+        self.message = self._statusline() + "\r\n\r\n"
+        self._send_response()
         return
-
-    # TODO: Needs to be updated for HTTP version
-    def _build_and_send_responses(self, status:int, to_send: bytes) \
-            -> bytearray:
-        """
-        Function to build a response and send it.
-
-        status(int): The response status code. Should reflect the content of
-            the message itself
-        to-send(bytes): The response message body.
-
-        The provided attributes are assembled into a bytes message according to
-        the protocol described in the handout. Various attributes such as the
-        payload length are dynamically calculated. If the message is longer 
-        than the set message limit, then the payload is broken into blocks and
-        sent seperately until all blocks have been sent.
-        """
-        # Get chechsum of the total message data to send
-        total_checksum = get_sha256(to_send)
-        # Calculate how long the payload can be, as we have a set limit of how
-        # many bytes can be sent, and a header that must be attatched to each
-        # message.
-        sendable_length = MSG_MAX-LEN_RESPONSE_LENGTH-LEN_STATUS-LEN_BLOCK_ID \
-            -LEN_BLOCKS_COUNT-LEN_BLOCK_HASH-LEN_TOTAL_HASH
-
-        blocks = math.ceil(len(to_send) / sendable_length)
-        this_block = 0
-
-        # loop to send one or more blocks of payload
-        while len(to_send) > 0:
-
-            this_payload = to_send[:sendable_length]
-
-            # Assemble an individual payload block
-            payload = bytearray()
-            payload.extend(struct.pack('!I', len(this_payload)))
-            payload.extend(struct.pack('!I', status))
-            payload.extend(struct.pack('!I', this_block))
-            payload.extend(struct.pack('!I', blocks))
-            payload.extend(get_sha256(this_payload))
-            payload.extend(total_checksum)    
-            payload.extend(this_payload)
-
-            print(f"Sending reply {this_block}/{blocks} with payload length "
-                f"of {len(this_payload)} bytes")
-
-            # Send the block
-            self.request.sendall(payload)
-
-            # Determine if more blocks to send
-            to_send = to_send[sendable_length:]
-            this_block = this_block + 1
 
 if __name__ == "__main__":
     configs = {
