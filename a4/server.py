@@ -1,5 +1,7 @@
-#!/bin/python3
 
+#!/bin/python3
+import datetime
+import locale
 import math
 import os
 import re
@@ -66,6 +68,8 @@ class RequestHandler(socketserver.StreamRequestHandler):
             entity_body = split_message[entity_body_i:]
 
             # TODO: Handle entity_body if entity_body is not empty.
+
+        
  
         # Always generate a response, this is the fallback for if all other
         # validation and handling fails. This is acceptable as a last resort,
@@ -138,10 +142,10 @@ class RequestHandler(socketserver.StreamRequestHandler):
             self.handle_accept(header_dict.get("accept"))
         if "accept-encoding" in header_dict:
             self.handle_Host(header_dict.get("host"))
-        if "connection" in header_dict:
-            self.handle_Host(header_dict.get("host"))
-        if "if-modified-since" in header_dict:
-            self.handle_Host(header_dict.get("host"))
+        if "Connection" in header_dict:
+            self.handle_Connection(header_dict.get("Connection"))
+        if "If-Modified-Since" in header_dict:
+            self.handle_If_Modified_Since(header_dict.get("If-Modified-Since"))
         if "if-unmodified-since" in header_dict:
             self.handle_Host(header_dict.get("host"))
         if "user-agent" in header_dict:
@@ -181,8 +185,36 @@ class RequestHandler(socketserver.StreamRequestHandler):
         if not any(type_ in supported for type_ in types_dict.keys):
             self.handle_error(STATUS_NOT_ACCEPTABLE_406, "Media types are not acceptable")
             return
-        
-        
+
+    # TODO: Might be expanded to support any comma-separated list of HTTP headers
+    def handle_Connection(self, Connection):
+        """
+        Custom function to handle Connection header type.
+        Sets self.server_should_close to True. Caller should use this
+        variable to close the connection after response has been processed.
+        """
+        if Connection == "close":
+            self.server_should_close = True
+
+
+    def handle_If_Modified_Since(self, If_Modified_Since: str):
+        """
+        Custom function to handle If-Modified-Since header type.
+        If succesful sets self.status to 200. This should be included
+        in response to client.
+        """
+        last_modified_secs = os.path.getmtime(self.url)
+        last_modified_date = datetime.fromtimestamp(last_modified_secs)
+        condition_date = datetime.strptime(If_Modified_Since, '%a, %d %b %Y %H:%M:%S GMT')
+
+        # If modification date is older than condition
+        if last_modified_date < condition_date:
+            self.handle_error(STATUS_NOT_MODIFIED_304, "File not modified")
+            return
+            
+        else:
+            self.status = 200 # OK
+
 
     # TODO: DEPRECATED
     def _handle_request(self, request:bytes) -> None:
