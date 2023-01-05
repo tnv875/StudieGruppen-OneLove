@@ -332,7 +332,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
             "200": "OK",
             "301": "Moved Permanently",
             "304": "Not Modified",
-            "404": "Not found",
+            "404": "Not Found",
             "406": "Not Acceptable",
             "412": "Modified"
         }
@@ -348,22 +348,20 @@ class RequestHandler(socketserver.StreamRequestHandler):
         """
 
         try:
-            print(self.url)
             # If last char is '/', add index.html 
             if self.url[-1] == '/':
                 self.url += 'index.html'
-            print(self.url)
 
             with open(self.url) as requested_file:
                 self.data = requested_file.read()
-            print('succesfully read file')
+            print(f'Succesfully managed to read file at {self.url}')
         except:
-            print('could not read file')
+            print('Could not read file')
 
         # Send a response
         print(f'Sending requested data from {self.url}')
         self._build_and_send_response()
-        print('Made it here! <3')
+        print('Made it to the very end! <3')
         return
 
     def _handle_HEAD(self):
@@ -381,10 +379,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
 
         # Content length response header
         content_length = len(bytes(self.data, 'utf-8'))
-        print(content_length)
         self.response_headers.append(f'Content-Length: {content_length}')
-        print('self.response_headers')
-        print(self.response_headers)
 
         headers_str = '\r\n'.join(self.response_headers)
 
@@ -400,6 +395,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
             self.server.server_close()
 
 
+    #TODO: Make sure this correctly interrupts the rest of the thread.
     def _handle_error(self):
         self.message = self._statusline() + "\r\n\r\n"
         self._build_and_send_response()

@@ -28,7 +28,7 @@ def send_to_server(message: str) -> None:
 
         # Receive a response and print it
         response = client_socket.recv(MSG_MAX_SIZE)
-        print(response)
+        print(response.decode('utf-8'))
 
         # This line is not strictly necessary due to the with statement, but
         # has been left here to illustrate the complete socket lifespan
