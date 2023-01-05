@@ -56,30 +56,23 @@ class RequestHandler(socketserver.StreamRequestHandler):
             self.response_headers = []
             self.message = ""
 
-            # Generate Date Response Header
-            self._date_format = '%a, %d %b %Y %H:%M:%S GMT'
-            now = datetime.now()
-            date = now.strftime(self._date_format)
-            self.response_headers.append(f'Date: {date}')
-            # Generate Server Response Header
-            self.ip = '127.0.0.1'
-            self.response_headers.append(f'Server: {self.ip}')
+            # Add date and server IP to Response headers
+            self.gen_date()
+            self.gen_server()
 
             # Read message
             bytes_message: bytes = self.request.recv(MSG_MAX)
             string_message: str = bytes_message.decode('utf-8')
             split_message = string_message.split(sep="\r\n")
 
-            # Get request_lines using custom function
-            request_lines = split_message[0]
-
-            # Decompose into method, url and protocol using .split() to split by space character
+            # Decompose into method, url and protocol using custom function
             self.method, self.url, self.protocol = self.get_request_lines(split_message)
             self.url = '.' + self.url
 
             # Get header_lines using custom function
             header_lines, entity_body_i = self.get_header_lines(split_message)
             
+            # Handle headers
             self.handle_headers(header_lines)
 
             # TODO: Handle entity_body if neededDefine final lines as entity_body
@@ -90,20 +83,40 @@ class RequestHandler(socketserver.StreamRequestHandler):
             # Build and send HTTP_response
             if self.method == "GET":
                 self.handle_GET()
+
+                print(f'Sending requested data from {self.url}')
+                self.build_and_send_response()
+
             elif self.method == "Head":
-                self.handle_HEAD()
+                self.build_and_send_response(should_send_data=False)
+
             else:
                 self.handle_error()
-        
+
+            print('Made it to the very end! <3')
+
  
         # Always generate a response, this is the fallback for if all other
         # validation and handling fails. This is acceptable as a last resort,
         # but were possible more helpful feedback and responses should be 
         # generated.
         except Exception as e:
-            self.status = STATUS_OTHER        
+            self.status = STATUS_OTHER
+            self.handle_error()        
 
-    # TODO: Might need more asserts
+
+    def gen_date(self):
+        self._date_format = '%a, %d %b %Y %H:%M:%S GMT'
+        now = datetime.now()
+        date = now.strftime(self._date_format)
+        self.response_headers.append(f'Date: {date}')
+
+
+    def gen_server(self):
+        self.ip = '127.0.0.1'
+        self.response_headers.append(f'Server: {self.ip}')
+
+
     def get_request_lines(self, split_message):
         """
         Custom function to get request_lines from split_message. 
@@ -156,7 +169,6 @@ class RequestHandler(socketserver.StreamRequestHandler):
             name, value = header_lines[element].split(sep=": ")
             header_dict.update({name: value})
         
-
         if "Host" not in header_dict:
             self.handle_error(STATUS_BAD_REQUEST, f"Missing a Host header field")
             print('Handled Host error')
@@ -260,6 +272,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
                      next
             return
 
+
     # TODO: Might be expanded to support any comma-separated list of HTTP headers
     def handle_Connection(self, Connection):
         """
@@ -295,6 +308,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
             
         else:
             self.status = 200 # OK
+
 
     def handle_If_Unmodified_Since(self, If_Unmodified_Since: str):
         """
@@ -346,26 +360,24 @@ class RequestHandler(socketserver.StreamRequestHandler):
         always generated, either the data file or an error message explaining 
         what went wrong.
         """
-
-        try:
-            # If last char is '/', add index.html 
-            if self.url[-1] == '/':
+        if self.url[-1] == '/':
+            # If folder is requested, return index.html if it exists
+            if os.path.exists(self.url + 'index.html'):
                 self.url += 'index.html'
 
+            # Otherwise list contents of requested folder 
+            # and skip trying to read non-existant file
+            else:
+                self.data = '\n'.join(os.listdir())
+                return
+
+        try:                    
             with open(self.url) as requested_file:
                 self.data = requested_file.read()
             print(f'Succesfully managed to read file at {self.url}')
         except:
-            print('Could not read file')
+            print('Could not read url')
 
-        # Send a response
-        print(f'Sending requested data from {self.url}')
-        self.build_and_send_response()
-        print('Made it to the very end! <3')
-        return
-
-    def handle_HEAD(self):
-        self.build_and_send_response(should_send_data = False)
         return
 
     def gen_statusline(self):
@@ -373,7 +385,6 @@ class RequestHandler(socketserver.StreamRequestHandler):
 
 
     def build_and_send_response(self, should_send_data = True):
-
         statusline = self.gen_statusline()
         # print(self.data)
 
