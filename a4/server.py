@@ -170,12 +170,16 @@ class RequestHandler(socketserver.StreamRequestHandler):
         according to the combined Accept field value, then the server SHOULD
         send a 406 (not acceptable) response.'''
 
-        # TODO: Update to actually contain supported MIME types
-        accept.split()
+        types = accept.split(sep= ", ")
 
-        supported = ['*/*', 'text/html']
-        if accept not in supported:
-            self.handle_error(STATUS_NOT_ACCEPTABLE_406, "Media type not acceptable")
+        types_dict = {}
+        for type_ in types:
+            key, value = type_.split(sep=";", maxsplit=1)
+            types_dict.update({key: value})
+
+        supported = ['*/*', 'text/html', 'text/plain']
+        if not any(type_ in supported for type_ in types_dict.keys):
+            self.handle_error(STATUS_NOT_ACCEPTABLE_406, "Media types are not acceptable")
             return
         
         
