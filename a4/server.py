@@ -170,7 +170,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
 
 
     # TODO: Handle Accept
-    def handle_accept(self, accept: str):
+    def handle_Accept(self, accept: str):
         """
         Method to handle accept in header. Assumes an accept header is present in the file
         """
