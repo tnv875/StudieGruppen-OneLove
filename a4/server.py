@@ -112,7 +112,6 @@ class RequestHandler(socketserver.StreamRequestHandler):
         
         return method, url, protocol
 
-
     def _get_header_lines(self, split_message):
         """
         Custom function to get header_lines from split_message.
@@ -162,7 +161,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
             self.handle_error(STATUS_BAD_REQUEST, f"Invalid host")
 
     # TODO: Handle Accept
-    def handle_accept(self, accept: str):
+    def handle_accept(self, accpet: string):
         """
         Method to handle accept in header. Assumes an accept header is present in the file
         """
@@ -181,9 +180,33 @@ class RequestHandler(socketserver.StreamRequestHandler):
             key, value = type_.split(sep=";", maxsplit=1)
             types_dict.update({key: value})
 
-        supported = ['*/*', 'text/html', 'text/plain']
-        if not any(type_ in supported for type_ in types_dict.keys):
+        types_subtypes = {"*": "*", "image": ["jpeg", "jpg", "png", "svg+xml"], "text": ["html", "plain", "csv", "css"], "application": ["xhtml+xml", "xml"]}
+        accepted_list = []
+        for type_subtype in types_dict.keys():
+            MIME_type, MIME_subtype = type_subtype.split(sep="/")
+            if MIME_type in types_subtypes:
+                if MIME_subtype in types_subtypes[MIME_type]:
+                    #Make a list of all matches --> Sorted List
+                    accepted_list.append(MIME_type+"/"+MIME_subtype)
+                else:
+                    next
+            else:
+                next
+        if accepted_list == []:
             self.handle_error(STATUS_NOT_ACCEPTABLE_406, "Media types are not acceptable")
+        else:
+            final_dict = {}
+            for elem in accepted_list:
+                value = types_dict[elem].split(sep="=")[1]
+                final_dict.update({elem: value})
+            sorted_final_list_tuples = sorted(final_dict.items(), key= lambda x:x[1], reverse=True)
+            
+            # Search for file ending in sorted order from URL and self 
+            for best_option in sorted_final_list_tuples:
+                if os.path.exists(self.url + "." + best_option[0]):
+                    self.prefered_file_ending = best_option[0]
+                else:
+                     next
             return
 
     # TODO: Might be expanded to support any comma-separated list of HTTP headers
