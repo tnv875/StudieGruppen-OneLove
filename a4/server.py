@@ -180,7 +180,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
             key, value = type_.split(sep=";", maxsplit=1)
             types_dict.update({key: value})
 
-        types_subtypes = {"*": "*", "image": ["jpeg", "jpg", "png", "svg+xml"], "text": ["html", "plain", "csv", "css"], "application": ["xhtml+xml", "xml"]}
+        types_subtypes = {"*": "*", "image": ["jpeg", "png", "svg+xml"], "text": ["html", "plain", "csv", "css"], "application": ["xhtml+xml", "xml"]}
         accepted_list = []
         for type_subtype in types_dict.keys():
             MIME_type, MIME_subtype = type_subtype.split(sep="/")
@@ -204,7 +204,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
             # Search for file ending in sorted order from URL and self 
             for best_option in sorted_final_list_tuples:
                 if os.path.exists(self.url + "." + best_option[0]):
-                    self.prefered_file_ending = best_option[0]
+                    self.url = self.url+"."+best_option[0]
                 else:
                      next
             return
