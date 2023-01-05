@@ -145,10 +145,10 @@ class RequestHandler(socketserver.StreamRequestHandler):
             self.handle_Connection(header_dict.get("Connection"))
         if "If-Modified-Since" in header_dict:
             self.handle_If_Modified_Since(header_dict.get("If-Modified-Since"))
-        if "if-unmodified-since" in header_dict:
-            self.handle_Host(header_dict.get("host"))
+        if "if-Unmodified-since" in header_dict:
+            self.handle_If_Unmodified_Since(header_dict.get("If-Unmodified-Since"))
         if "user-agent" in header_dict:
-            self.handle_Host(header_dict.get("host"))
+            self.handle_user_agent(header_dict.get("user-agent"))
 
 
     def handle_Host(self, host: str):
@@ -237,6 +237,32 @@ class RequestHandler(socketserver.StreamRequestHandler):
             
         else:
             self.status = 200 # OK
+
+    def handle_If_Unmodified_Since(self, If_Unmodified_Since: str):
+        """
+        Method for handleing If_Unmodified_Since header type.
+        Will succeed if the recourse has not been modified since the date specified in the HTTP request. 
+        If it has changed, the response will be a 412 precondition failed error.
+        """
+        last_modified_secs = os.path.getmtime(self.url)
+        last_modified_date = datetime.fromtimestamp(last_modified_secs)
+        condition_date = datetime.strptime(If_Unmodified_Since, '%a, %d %b %Y %H:%M:%S GMT')
+
+        # If modification date is later than condition
+        if last_modified_date > condition_date:
+            self.handle_error(STATUS_MODIFIED_412, "File modified")
+            return
+        else:
+            self.status = 200 # OK
+
+
+    def handle_user_agent(self, user_agent: str):
+        """
+        Method for handleing user-agent header type.
+        Will always succeed.
+        """
+        #user_agent is nearly allways  == "Mozilla/5.0" at least for all testcases, and as such we will always return success.
+        return
 
 
     # TODO: DEPRECATED
