@@ -50,11 +50,11 @@ class RequestHandler(socketserver.StreamRequestHandler):
         try:
             # Read message
             bytes_message: bytes   = self.request.recv(MSG_MAX)
-            string_message: string = bytes_message.decode('utf-8')
+            string_message: str = bytes_message.decode('utf-8')
             split_message = string_message.split(sep="\r\n")
 
             # Get request_lines using custom function
-            method, url, protocol = self._get_request_lines()
+            self.method, self.url, self.protocol = self._get_request_lines()
 
             # Get header_lines using custom function
             header_lines, entity_body_i = self._get_header_lines()
@@ -111,8 +111,8 @@ class RequestHandler(socketserver.StreamRequestHandler):
     def _get_header_lines(self, split_message):
         """
         Custom function to get header_lines from split_message.
-        Returns tuple containing header_lines and i. i is used for getting
-        entity_body if it exists.
+        Returns tuple containing header_lines and i. i is used by caller
+        for getting entity_body if it exists.
         """
         header_lines = []
         i = 1
@@ -121,12 +121,14 @@ class RequestHandler(socketserver.StreamRequestHandler):
             i += 1
         return (header_lines,i)
 
+
     def handle_headers(self, header_lines):
         header_dict = {}
         for element in range(0, len(header_lines)):
             name, value = header_lines[element].split(sep=": ")
             header_dict.update({name: value})
         
+        # TODO: Update handle_*() methods to correspond to individual headers. Check capitalization of header fields.
         if "host" not in header_dict:
             self.handle_error(STATUS_BAD_REQUEST, f"Missing a Host header field")
         else:
@@ -145,7 +147,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
             self.handle_Host(header_dict.get("host"))
 
 
-    def handle_Host(self, host: string):
+    def handle_Host(self, host: str):
         """
         Custom function to handle header Host
         """
@@ -155,19 +157,11 @@ class RequestHandler(socketserver.StreamRequestHandler):
             self.handle_error(STATUS_BAD_REQUEST, f"Invalid host")
 
     # TODO: Handle Accept
-    def handle_accept(self, accept: string):
+    def handle_accept(self, accpet: string):
         """
-        Method to handle accept in header
+        Method to handle accept in header. Assumes an accept header is present in the file
         """
-        types_subtypes = {"*": "*", "audio" : ["mpeg", "vorbis"], } 
         
-        MIME_type, MIME_subtype = accept.split(sep="/")
-        if MIME_type in types_subtypes:
-            if MIME_subtype in types_subtypes[MIME_subtype]:
-
-
-
-
 
     # TODO: DEPRECATED
     def _handle_request(self, request:bytes) -> None:

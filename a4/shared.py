@@ -20,6 +20,7 @@ STATUS_OK = 1
 STATUS_BAD_REQUEST = 2
 STATUS_MALFORMED = 3
 STATUS_OTHER = 4
+STATUS_NOT_ACCEPTABLE_406 = 406
 
 def get_sha256(data: bytes) -> str:
     """
