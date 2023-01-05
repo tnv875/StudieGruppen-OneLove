@@ -50,11 +50,11 @@ class RequestHandler(socketserver.StreamRequestHandler):
         try:
             # Read message
             bytes_message: bytes   = self.request.recv(MSG_MAX)
-            string_message: string = bytes_message.decode('utf-8')
+            string_message: str = bytes_message.decode('utf-8')
             split_message = string_message.split(sep="\r\n")
 
             # Get request_lines using custom function
-            method, url, protocol = self._get_request_lines()
+            self.method, self.url, self.protocol = self._get_request_lines()
 
             # Get header_lines using custom function
             header_lines, entity_body_i = self._get_header_lines()
@@ -148,7 +148,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
             self.handle_Host(header_dict.get("host"))
 
 
-    def handle_Host(self, host: string):
+    def handle_Host(self, host: str):
         """
         Custom function to handle header Host
         """
@@ -158,7 +158,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
             self.handle_error(STATUS_BAD_REQUEST, f"Invalid host")
 
     # TODO: Handle Accept
-    def handle_accept(self, accept: string):
+    def handle_accept(self, accept: str):
         """
         Method to handle accept in header. Assumes an accept header is present in the file
         """
@@ -171,9 +171,13 @@ class RequestHandler(socketserver.StreamRequestHandler):
         send a 406 (not acceptable) response.'''
 
         # TODO: Update to actually contain supported MIME types
+        accept.split()
+
         supported = ['*/*', 'text/html']
         if accept not in supported:
             self.handle_error(STATUS_NOT_ACCEPTABLE_406, "Media type not acceptable")
+            return
+        
         
 
     # TODO: DEPRECATED
