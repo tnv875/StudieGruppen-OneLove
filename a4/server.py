@@ -429,7 +429,8 @@ class RequestHandler(socketserver.StreamRequestHandler):
 
         # Content length response header
         content_length = len(bytes(self.data, 'utf-8'))
-        self.response_headers.append(f'Content-Length: {content_length}')
+        if content_length != 0:
+            self.response_headers.append(f'Content-Length: {content_length}')
 
         headers_str = '\r\n'.join(self.response_headers)
 
