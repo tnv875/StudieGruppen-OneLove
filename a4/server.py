@@ -78,10 +78,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
             # Handle headers
             self.handle_headers(header_lines)
 
-            # TODO: Handle entity_body if needed Define final lines as entity_body
             entity_body = split_message[entity_body_i:]
-
-            # TODO: Handle entity_body if entity_body is not empty.
 
             # Build and send HTTP_response
             if self.method == "GET":
@@ -174,7 +171,6 @@ class RequestHandler(socketserver.StreamRequestHandler):
             self.handle_Host(header_dict.get("Host"))
             print('Handled Host')
 
-        # TODO: Fix self.handle_Accept() since it is currently broken. Then remove try/except below.
         if "Accept" in header_dict:
             try:
                 self.handle_Accept(header_dict.get("Accept"))
@@ -182,7 +178,6 @@ class RequestHandler(socketserver.StreamRequestHandler):
             except Exception as e:
                 print('Could not handle Accept')
            
-        # TODO: Implement self.handle_Accept-Encoding()
         if "Accept-Encoding" in header_dict:
             try:
                 self.handle_Accept_Encoding(header_dict.get("Accept-Encoding"))
@@ -220,7 +215,6 @@ class RequestHandler(socketserver.StreamRequestHandler):
             self.handle_error()
 
 
-    # TODO: Handle Accept
     def handle_Accept(self, accept: str):
         """
         Method to handle accept in header. Assumes an accept header is present in the file
@@ -318,8 +312,6 @@ class RequestHandler(socketserver.StreamRequestHandler):
             self.handle_error()
         return
 
-
-    # TODO: Might be expanded to support any comma-separated list of HTTP headers
     def handle_Connection(self, Connection):
         """
         Custom function to handle Connection header type.
@@ -420,10 +412,9 @@ class RequestHandler(socketserver.StreamRequestHandler):
             else:
                 self.data = '\n'.join(os.listdir())
                 return
-
+        print(self.url)
         try:                    
-            with open(self.url) as requested_file:
-                # TODO: Make sure we can read img-files (these would be interpreted as bytes initially?) 
+            with open(self.url, 'rb') as requested_file: 
                 self.data = requested_file.read()
             print(f'Succesfully managed to read file at {self.url}')
         except:
@@ -437,23 +428,22 @@ class RequestHandler(socketserver.StreamRequestHandler):
 
     def build_and_send_response(self, should_send_data = True):
         statusline = bytes(self.gen_statusline(), 'utf-8')
-        data_bytes = bytes(self.data, 'utf-8')
 
         if should_send_data:
             if self.encoding == "gzip":
                 import gzip
-                data_bytes = gzip.compress(data_bytes)
+                self.data = gzip.compress(self.data)
 
             # Content length response header
-            content_length = len(data_bytes)
+            content_length = len(self.data)
             if content_length != 0:
                 self.response_headers.append(f'Content-Length: {content_length}')
 
         else:
-            data_bytes = b""
+            self.data = b""
 
         headers = bytes('\r\n'.join(self.response_headers), 'utf-8')
-        self.message = b'\r\n'.join([statusline, headers, b'', data_bytes])
+        self.message = b'\r\n'.join([statusline, headers, b'', self.data])
 
         self.request.sendall(self.message)
         if self.connection == 'close':
