@@ -314,8 +314,6 @@ class RequestHandler(socketserver.StreamRequestHandler):
         """
         self.connection = Connection
         
-        #Add Connection response to output header
-        #TODO: Text connection response header handling
         self.response_headers.append(f'Connection: {Connection}')
 
 
@@ -445,15 +443,11 @@ class RequestHandler(socketserver.StreamRequestHandler):
         self.message = b'\r\n'.join([statusline, headers, b'', self.data])
 
         self.request.sendall(self.message)
-        if self.connection == 'close':
-            print("Closing since client asked me to")
-            self.server.server_close()
-
 
     def handle_error(self):
         self.data = b""
         self.build_and_send_response()
-        print(f"Handled error: {self.status}: {self.human_status()}")
+        print(f"Handled error: {self.status, self.human_status()}")
         sys.exit()
 
 if __name__ == "__main__":
