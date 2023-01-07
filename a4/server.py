@@ -64,7 +64,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
             self.gen_server()
 
             # Read message
-            bytes_message: bytes = self.request.recv(MSG_MAX)
+            bytes_message: bytes = self.request.recv(256*256)
             string_message: str = bytes_message.decode('utf-8')
             split_message = string_message.split(sep="\r\n")
 
@@ -191,8 +191,11 @@ class RequestHandler(socketserver.StreamRequestHandler):
         # Note: This header is currently not included in test client request,
         # thus it is correct to not handle right now.
         if "If-Modified-Since" in header_dict:
-            self.handle_If_Modified_Since(header_dict.get("If-Modified-Since"))
-            print('Handled If-Modified-Since')
+            try:
+                self.handle_If_Modified_Since(header_dict.get("If-Modified-Since"))
+                print('Handled If-Modified-Since')
+            except Exception as e:
+                print('Could not handle If-Modified-Since')
 
          # Note: This header is currently not included in test client request,
         # thus it is correct to not handle right now.
@@ -304,7 +307,6 @@ class RequestHandler(socketserver.StreamRequestHandler):
         accepted = Accept_Encoding.split(', ')
         if 'gzip' in accepted:
             self.encoding = 'gzip'
-            self.response_headers.append("Content-Encoding: gzip")
         else:
             self.status = 406 # Encoding not acceptable
             self.handle_error()
@@ -327,7 +329,6 @@ class RequestHandler(socketserver.StreamRequestHandler):
         If succesful sets self.status to 200. This should be included
         in response to client.
         """
-        print('started handle_If_Modified_Since()')
         last_modified_secs = os.path.getmtime(self.url)
         last_modified_date = datetime.fromtimestamp(last_modified_secs)
         condition_date = datetime.strptime(If_Modified_Since, self._date_format)
@@ -350,13 +351,14 @@ class RequestHandler(socketserver.StreamRequestHandler):
         """
         last_modified_secs = os.path.getmtime(self.url)
         last_modified_date = datetime.fromtimestamp(last_modified_secs)
-        condition_date = datetime.strptime(If_Unmodified_Since, '%a, %d %b %Y %H:%M:%S GMT')
+        condition_date = datetime.strptime(If_Unmodified_Since, self._date_format)
 
-        # If modification date is later than condition
+        # If modification date is older than condition
         if last_modified_date > condition_date:
             self.status = 412
             self.handle_error()
             return
+            
         else:
             self.status = 200 # OK
 
@@ -434,6 +436,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
             if self.encoding == "gzip":
                 import gzip
                 self.data = gzip.compress(self.data)
+                self.response_headers.append("Content-Encoding: gzip")
 
             # Content length response header
             content_length = len(self.data)
@@ -449,8 +452,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
         self.request.sendall(self.message)
 
     def handle_error(self):
-        self.data = b""
-        self.build_and_send_response()
+        self.build_and_send_response(should_send_data=False)
         print(f"Handled error: {self.status, self.human_status()}")
         sys.exit()
 
