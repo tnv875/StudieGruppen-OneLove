@@ -74,20 +74,19 @@ class RequestHandler(socketserver.StreamRequestHandler):
 
             # Get header_lines using custom function
             header_lines, entity_body_i = self.get_header_lines(split_message)
-            
+        
             # Handle headers
             self.handle_headers(header_lines)
 
             entity_body = split_message[entity_body_i:]
 
-            # Build and send HTTP_response
             if self.method == "GET":
                 self.handle_GET()
 
                 print(f'Sending requested data from {self.url}')
                 self.build_and_send_response()
 
-            elif self.method == "Head":
+            elif self.method == "HEAD":
                 self.build_and_send_response(should_send_data=False)
 
             else:
@@ -113,8 +112,8 @@ class RequestHandler(socketserver.StreamRequestHandler):
 
 
     def gen_server(self):
-        self.ip = '127.0.0.1'
-        self.response_headers.append(f'Server: {self.ip}')
+        self.server = '127.0.0.1:12345'
+        self.response_headers.append(f'Server: {self.server}')
 
 
     def get_request_lines(self, split_message):
@@ -156,7 +155,6 @@ class RequestHandler(socketserver.StreamRequestHandler):
             i += 1
         return (header_lines,i)
 
-
     def handle_headers(self, header_lines):
         header_dict = {}
         for element in range(0, len(header_lines)):
@@ -164,11 +162,11 @@ class RequestHandler(socketserver.StreamRequestHandler):
             header_dict.update({name: value})
         
         if "Host" not in header_dict:
-            self.status = 400
-            self.handle_error()
-            print('Handled Host error')
-        else:
-            self.handle_Host(header_dict.get("Host"))
+            try:
+                self.handle_Host(header_dict.get("Host"))
+            except:
+                print('Could not handle Host')       
+
             print('Handled Host')
 
         if "Accept" in header_dict:
@@ -176,6 +174,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
                 self.handle_Accept(header_dict.get("Accept"))
                 print('Handled Accept')
             except Exception as e:
+                print(header_dict.get("Accept"))
                 print('Could not handle Accept')
            
         if "Accept-Encoding" in header_dict:
@@ -217,7 +216,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
         Custom function to handle header Host
         """
         # TODO: Could be upgraded to support servers that are not hosted locally
-        if host != self.ip:
+        if host != self.server:
             self.status = 400
             self.handle_error()
 
@@ -232,7 +231,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
         if self.url[-1] == "\\":
             return
 
-        types = accept.split(sep= ", ")
+        types = accept.split(sep= ",")
 
         types_dict = {}
         for type_ in types:
@@ -308,7 +307,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
         Our implementation only supports gzip.
         """
 
-        accepted = Accept_Encoding.split(', ')
+        accepted = Accept_Encoding.split(',')
         if 'gzip' in accepted:
             self.encoding = 'gzip'
         else:
