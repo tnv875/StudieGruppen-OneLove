@@ -47,11 +47,13 @@ def send_to_server(message: str) -> None:
             import gzip
             payload = gzip.decompress(payload)
         
+        # If png
         if "Content-Type: */jpg" in response_headers:
             with open('downloaded_image.jpg', 'wb') as file:
                 file.write(payload)
             payload = b"Image written to downloaded_image.jpg"
 
+        # If jpg
         if "Content-Type: */png" in response_headers:
             with open('downloaded_image.png', 'wb') as file:
                 file.write(payload)
@@ -81,16 +83,16 @@ if __name__ == "__main__":
         # "GET /Dog_meme HTTP/1.1\r\nHost: 127.0.0.1\r\nAccept: */jpg\r\nAccept-Encoding: gzip, deflate\r\nUser-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13\r\nConnection: Keep-Alive\r\n\r\n",
 
         # # # Correct request, png requested
-        "GET /Dog_meme HTTP/1.1\r\nHost: 127.0.0.1\r\nAccept: */png\r\nAccept-Encoding: gzip, deflate\r\nUser-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13\r\nConnection: Keep-Alive\r\n\r\n",
+        # "GET /Dog_meme HTTP/1.1\r\nHost: 127.0.0.1\r\nAccept: */png\r\nAccept-Encoding: gzip, deflate\r\nUser-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13\r\nConnection: Keep-Alive\r\n\r\n",
 
         # # Unsupported method
-        # "POST / HTTP/1.1\r\nHost: 127.0.0.1\r\nAccept: */*\r\nAccept-Encoding: gzip, deflate\r\nUser-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13\r\nConnection: Keep-Alive\r\n\r\n",
+        "POST / HTTP/1.1\r\nHost: 127.0.0.1\r\nAccept: */*\r\nAccept-Encoding: gzip, deflate\r\nUser-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13\r\nConnection: Keep-Alive\r\n\r\n",
 
         # Wrong host
-        # "GET / HTTP/1.1\r\nHost: 127.0.0.6\r\nAccept: */*\r\nAccept-Encoding: gzip, deflate\r\nUser-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13\r\nConnection: Keep-Alive\r\n\r\n",
+        "GET / HTTP/1.1\r\nHost: 127.0.0.6\r\nAccept: */*\r\nAccept-Encoding: gzip, deflate\r\nUser-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13\r\nConnection: Keep-Alive\r\n\r\n",
 
         # Wrong HTTP version
-        # "GET / HTTP/1.0\r\nHost: 127.0.0.6\r\nAccept: */*\r\nAccept-Encoding: gzip, deflate\r\nUser-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13\r\nConnection: Keep-Alive\r\n\r\n"
+        "GET / HTTP/1.0\r\nHost: 127.0.0.6\r\nAccept: */*\r\nAccept-Encoding: gzip, deflate\r\nUser-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13\r\nConnection: Keep-Alive\r\n\r\n"
     ]
 
     for request in requests:

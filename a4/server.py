@@ -451,9 +451,10 @@ class RequestHandler(socketserver.StreamRequestHandler):
 
 
     def handle_error(self):
-        self.message = self.gen_statusline() + "\r\n\r\n"
+        self.data = b""
         self.build_and_send_response()
-        return
+        print(f"Handled error: {self.status}: {self.human_status()}")
+        sys.exit()
 
 if __name__ == "__main__":
     configs = {
