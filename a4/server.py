@@ -386,7 +386,6 @@ class RequestHandler(socketserver.StreamRequestHandler):
 
     def build_and_send_response(self, should_send_data = True):
         statusline = self.gen_statusline()
-        # print(self.data)
 
         # Content length response header
         content_length = len(bytes(self.data, 'utf-8'))
