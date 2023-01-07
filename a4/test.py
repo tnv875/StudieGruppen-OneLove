@@ -2,7 +2,7 @@ import os
 url = "C:\\Users\\Lenovo\\Documents\\GitHub\\StudieGruppen-OneLove\\a4\\Dog_meme"
 
 
-accept = "*/*"
+accept = "*/png"
 
 types = accept.split(sep= ", ")
 

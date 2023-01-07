@@ -136,12 +136,6 @@ class RequestHandler(socketserver.StreamRequestHandler):
             self.handle_error()
             return
 
-        # - url exists
-        if not os.path.exists(url):
-            self.status = 400
-            self.handle_error()
-            return
-
         # - protocol is HTTP/1.1
         if protocol != "HTTP/1.1":
             self.status = 505
@@ -299,10 +293,11 @@ class RequestHandler(socketserver.StreamRequestHandler):
                     next
 
 
-    # TODO: Make it work?
     def handle_Accept_Encoding(self, Accept_Encoding: str):
-        # We talked with TA about this. It is not in the essence of the task to make cryptography, so we did not encode anything here.
-        # But we are consious that we should have encoded our response useing the given technique if we had developed this further. 
+        """
+        We talked with TA about this. It is not in the essence of the task to make cryptography, so we did not encode anything here.
+        But we are consious that we could have encoded our response useing the given technique if we had developed this further. 
+        """
         return
 
 
