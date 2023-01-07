@@ -424,7 +424,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
             print(f'Succesfully managed to read file at {self.url}')
         except:
             print('Could not read url')
-            self.status = 400
+            self.status = 404
             self.handle_error()
         return
 
