@@ -187,7 +187,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
         # TODO: Implement self.handle_Accept-Encoding()
         if "Accept-Encoding" in header_dict:
             try:
-                self.handle_Accept-Encoding(header_dict.get("Accept-Encoding"))
+                self.handle_Accept_Encoding(header_dict.get("Accept-Encoding"))
             except Exception as e:
                 print('Could not handle Accept-Encoding')
 
@@ -239,8 +239,15 @@ class RequestHandler(socketserver.StreamRequestHandler):
 
         types_dict = {}
         for type_ in types:
-            key, value = type_.split(sep=";", maxsplit=1)
-            types_dict.update({key: value})
+            try:
+                if ";" in type_:
+                    key, value = type_.split(sep=";", maxsplit=1)
+                    variable, value = value.split(sep="=", maxsplit=1)
+                    types_dict.update({key: value})
+                else:
+                    types_dict.update({type_: "1.1"})
+            except:
+                print("Here")
 
         types_subtypes = {"*": "*", "image": ["jpeg", "png", "svg+xml"], "text": ["html", "plain", "csv", "css"], "application": ["xhtml+xml", "xml"]}
         accepted_list = []
@@ -260,7 +267,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
         else:
             final_dict = {}
             for elem in accepted_list:
-                value = types_dict[elem].split(sep="=")[1]
+                value = types_dict[elem]
                 final_dict.update({elem: value})
             sorted_final_list_tuples = sorted(final_dict.items(), key= lambda x:x[1], reverse=True)
             
@@ -269,8 +276,13 @@ class RequestHandler(socketserver.StreamRequestHandler):
                 if os.path.exists(self.url + "." + best_option[0]):
                     self.url = self.url+"."+best_option[0]
                 else:
-                     next
+                    next
             return
+
+
+    # TODO: Make it work?
+    def handle_Accept_Encoding(self, Accept_Encoding: str):
+        return
 
 
     # TODO: Might be expanded to support any comma-separated list of HTTP headers
