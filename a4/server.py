@@ -411,7 +411,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
                 self.data = '\n'.join(os.listdir())
                 self.response_headers.append('Content-Type: text/plain')
                 return
-        print(self.url)
+
         try:                    
             with open(self.url, 'rb') as requested_file: 
                 self.data = requested_file.read()
@@ -449,7 +449,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
         self.request.sendall(self.message)
 
     def handle_error(self):
-        self.message = self.gen_statusline() + "\r\n\r\n"
+        self.data = b""
         self.build_and_send_response()
         print(f"Handled error: {self.status, self.human_status()}")
         sys.exit()
