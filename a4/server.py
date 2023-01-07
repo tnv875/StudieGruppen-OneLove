@@ -274,7 +274,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
                         for type in types_subtypes:
                             for elem in	types_subtypes[type]:
                                 if os.path.exists(self.url + "." + elem):
-                                    MIME_type = best_option[0].split(sep="/")[0]
+                                    MIME_type = type
                                     MIME_subtype = best_option[0].split(sep="/")[1]
                                     self.response_headers.append(f"Content-Type: {MIME_type}/{MIME_subtype}")
                                     self.url = self.url + "." + elem
@@ -282,7 +282,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
                     else:
                         for elem in	types_subtypes[best_option[0].split(sep="/")[0]]:
                             if os.path.exists(self.url + "." + elem):
-                                MIME_type = best_option[0].split(sep="/")[0]
+                                MIME_type = elem
                                 MIME_subtype = best_option[0].split(sep="/")[1]
                                 self.response_headers.append(f"Content-Type: {MIME_type}/{MIME_subtype}")
                                 self.url = self.url + "." + best_option[0].split(sep="/")[1]
