@@ -2,7 +2,7 @@ import socket
 
 SERVER_IP = "127.0.0.1"
 SERVER_PORT = 12345
-MSG_MAX_SIZE = 256
+MSG_MAX_SIZE = 256*256
 
 
 def send_to_server(message: str) -> None:
@@ -28,7 +28,19 @@ def send_to_server(message: str) -> None:
 
         # Receive a response and print it
         response = client_socket.recv(MSG_MAX_SIZE)
-        print(response.decode('utf-8'))
+        response_split = response.split(b'\r\n\r\n')
+        response_headers = response_split[0].decode('utf-8')
+        payload = response_split[1]
+        
+        # Uncompress if compressed
+        if "Content-Encoding: gzip" in response_headers:
+            import gzip
+            payload = gzip.decompress(payload)
+        payload = payload.decode('utf-8')
+
+        print(response_headers + "\r\n\r\n" + payload)
+
+        # print(response.decode('utf-8'))
 
         # This line is not strictly necessary due to the with statement, but
         # has been left here to illustrate the complete socket lifespan
@@ -46,13 +58,13 @@ if __name__ == "__main__":
         "GET /Dog_meme HTTP/1.1\r\nHost: 127.0.0.1\r\nAccept: */png\r\nAccept-Encoding: gzip, deflate\r\nUser-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13\r\nConnection: Keep-Alive\r\n\r\n",
 
         # Unsupported method
-        #"POST / HTTP/1.1\r\nHost: 127.0.0.1\r\nAccept: */*\r\nAccept-Encoding: gzip, deflate\r\nUser-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13\r\nConnection: Keep-Alive\r\n\r\n",
+        # "POST / HTTP/1.1\r\nHost: 127.0.0.1\r\nAccept: */*\r\nAccept-Encoding: gzip, deflate\r\nUser-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13\r\nConnection: Keep-Alive\r\n\r\n",
 
         # Wrong host
-        #"GET / HTTP/1.1\r\nHost: 127.0.0.6\r\nAccept: */*\r\nAccept-Encoding: gzip, deflate\r\nUser-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13\r\nConnection: Keep-Alive\r\n\r\n",
+        # "GET / HTTP/1.1\r\nHost: 127.0.0.6\r\nAccept: */*\r\nAccept-Encoding: gzip, deflate\r\nUser-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13\r\nConnection: Keep-Alive\r\n\r\n",
 
         # Wrong HTTP version
-        #"GET / HTTP/1.0\r\nHost: 127.0.0.6\r\nAccept: */*\r\nAccept-Encoding: gzip, deflate\r\nUser-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13\r\nConnection: Keep-Alive\r\n\r\n"
+        # "GET / HTTP/1.0\r\nHost: 127.0.0.6\r\nAccept: */*\r\nAccept-Encoding: gzip, deflate\r\nUser-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13\r\nConnection: Keep-Alive\r\n\r\n"
     ]
 
     for request in requests:
