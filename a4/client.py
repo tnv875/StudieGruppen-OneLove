@@ -38,7 +38,15 @@ def send_to_server(message: str) -> None:
 if __name__ == "__main__":
     # Send a message to a server
 
-    txt = "GET / HTTP/1.1\r\nHost: 127.0.0.1\r\nAccept: */*\r\nAccept-Encoding: gzip, deflate\r\nUser-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13\r\nConnection: Keep-Alive\r\n\r\n"
+    requests = [
+        # Correct request
+        "GET / HTTP/1.1\r\nHost: 127.0.0.1\r\nAccept: */*\r\nAccept-Encoding: gzip, deflate\r\nUser-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13\r\nConnection: Keep-Alive\r\n\r\n",
+        # Unsupported method
+        "POST / HTTP/1.1\r\nHost: 127.0.0.1\r\nAccept: */*\r\nAccept-Encoding: gzip, deflate\r\nUser-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13\r\nConnection: Keep-Alive\r\n\r\n",
+        # Wrong host
+        # "GET / HTTP/1.1\r\nHost: 127.0.0.6\r\nAccept: */*\r\nAccept-Encoding: gzip, deflate\r\nUser-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13\r\nConnection: Keep-Alive\r\n\r\n"
+    ]
 
-    send_to_server(txt)
+    for request in requests:
+        send_to_server(request)
 
