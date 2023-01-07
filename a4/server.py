@@ -411,9 +411,9 @@ class RequestHandler(socketserver.StreamRequestHandler):
             else:
                 self.data = '\n'.join(os.listdir())
                 return
-
+        print(self.url)
         try:                    
-            with open(self.url) as requested_file:
+            with open(self.url, 'rb') as requested_file:
                 # TODO: Make sure we can read img-files (these would be interpreted as bytes initially?) 
                 self.data = requested_file.read()
             print(f'Succesfully managed to read file at {self.url}')
@@ -428,23 +428,22 @@ class RequestHandler(socketserver.StreamRequestHandler):
 
     def build_and_send_response(self, should_send_data = True):
         statusline = bytes(self.gen_statusline(), 'utf-8')
-        data_bytes = bytes(self.data, 'utf-8')
 
         if should_send_data:
             if self.encoding == "gzip":
                 import gzip
-                data_bytes = gzip.compress(data_bytes)
+                self.data = gzip.compress(self.data)
 
             # Content length response header
-            content_length = len(data_bytes)
+            content_length = len(self.data)
             if content_length != 0:
                 self.response_headers.append(f'Content-Length: {content_length}')
 
         else:
-            data_bytes = b""
+            self.data = b""
 
         headers = bytes('\r\n'.join(self.response_headers), 'utf-8')
-        self.message = b'\r\n'.join([statusline, headers, b'', data_bytes])
+        self.message = b'\r\n'.join([statusline, headers, b'', self.data])
 
         self.request.sendall(self.message)
         if self.connection == 'close':
