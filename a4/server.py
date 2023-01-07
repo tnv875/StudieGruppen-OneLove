@@ -77,7 +77,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
             # Handle headers
             self.handle_headers(header_lines)
 
-            # TODO: Handle entity_body if neededDefine final lines as entity_body
+            # TODO: Handle entity_body if needed Define final lines as entity_body
             entity_body = split_message[entity_body_i:]
 
             # TODO: Handle entity_body if entity_body is not empty.
@@ -95,7 +95,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
             else:
                 self.handle_error()
 
-            print('Made it to the very end! <3')
+            print('Made it to the very end! <3\n')
 
  
         # Always generate a response, this is the fallback for if all other
@@ -144,7 +144,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
 
         # - protocol is HTTP/1.1
         if protocol != "HTTP/1.1":
-            self.status = 400
+            self.status = 505
             self.handle_error()
             return
         
@@ -172,7 +172,8 @@ class RequestHandler(socketserver.StreamRequestHandler):
             header_dict.update({name: value})
         
         if "Host" not in header_dict:
-            self.handle_error(STATUS_BAD_REQUEST, f"Missing a Host header field")
+            self.status = 400
+            self.handle_error()
             print('Handled Host error')
         else:
             self.handle_Host(header_dict.get("Host"))
@@ -364,13 +365,14 @@ class RequestHandler(socketserver.StreamRequestHandler):
             400: "Bad Request",
             404: "Not Found",
             406: "Not Acceptable",
-            412: "Modified"
+            412: "Modified",
+            505: "HTTP Version Not Supported"
         }
 
         if self.status in status_messages:
             return status_messages[self.status]
         else:
-            return "Unsupported status"
+            return "Unknown status code"
 
     def handle_GET(self) -> None:
         """
