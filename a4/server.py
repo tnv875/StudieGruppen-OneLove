@@ -282,7 +282,11 @@ class RequestHandler(socketserver.StreamRequestHandler):
                                 self.url = self.url + "." + best_option[0].split(sep="/")[1]
                                 return		
                 elif os.path.exists(self.url + "." + best_option[0].split(sep="/")[1]):
-                    MIME_type = best_option[0].split(sep="/")[0]
+                    for type in types_subtypes:
+                            for elem in	types_subtypes[type]:
+                                if elem == best_option[0].split(sep="/")[1]:
+                                    MIME_type = type
+                                    break
                     MIME_subtype = best_option[0].split(sep="/")[1]
                     self.response_headers.append(f"Content-Type: {MIME_type}/{MIME_subtype}")
                     self.url = self.url + "." + best_option[0].split(sep="/")[1]
@@ -451,10 +455,9 @@ class RequestHandler(socketserver.StreamRequestHandler):
 
 
     def handle_error(self):
-        self.data = b""
+        self.message = self.gen_statusline() + "\r\n\r\n"
         self.build_and_send_response()
-        print(f"Handled error: {self.status}: {self.human_status()}")
-        sys.exit()
+        return
 
 if __name__ == "__main__":
     configs = {
