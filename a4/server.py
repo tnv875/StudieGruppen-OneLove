@@ -1,12 +1,12 @@
 
 #!/bin/python3
-import datetime
 import locale
 import math
 import os
 import re
 import socketserver
 import struct
+from datetime import datetime
 
 # This is quick hack to get relative imports of a higher file working 
 if __package__ is None:
@@ -41,6 +41,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
     Custom handler to handle any inbound messages. Any input message will 
     ALWAYS receive an appropriate response.
     """
+        
 
     def handle(self):
         """
@@ -49,59 +50,74 @@ class RequestHandler(socketserver.StreamRequestHandler):
         This will read a request, perform some curseory validation before 
         calling more specific handling functions. Nothing is returned.
         """
-    
-        try:
 
+        try:
             self.status = 200 # OK
             self.response_headers = []
             self.message = ""
 
-            # Generate Date Response Header
-            self._date_format = '%a, %d %b %Y %H:%M:%S GMT'
-            now = datetime.now()
-            date = now.strftime(self._date_format)
-            self.response_headers.append(f'Date: {date}')
-
-            # Generate Server Response Header
-            self.ip = '127.0.0.1'
-            self.response_headers.append(f'Server: {self.ip}')
-
-        
+            # Add date and server IP to Response headers
+            self.gen_date()
+            self.gen_server()
 
             # Read message
             bytes_message: bytes = self.request.recv(MSG_MAX)
             string_message: str = bytes_message.decode('utf-8')
             split_message = string_message.split(sep="\r\n")
 
-            # Get request_lines using custom function
-            self.method, self.url, self.protocol = self._get_request_lines()
+            # Decompose into method, url and protocol using custom function
+            self.method, self.url, self.protocol = self.get_request_lines(split_message)
+            self.url = '.' + self.url
 
             # Get header_lines using custom function
-            header_lines, entity_body_i = self._get_header_lines()
+            header_lines, entity_body_i = self.get_header_lines(split_message)
             
-            # TODO: Handle individual headers
-            header_response = self.handle_headers(header_lines)
+            # Handle headers
+            self.handle_headers(header_lines)
 
-            # Define final lines as entity_body
+            # TODO: Handle entity_body if neededDefine final lines as entity_body
             entity_body = split_message[entity_body_i:]
 
             # TODO: Handle entity_body if entity_body is not empty.
 
             # Build and send HTTP_response
             if self.method == "GET":
-                self._handle_GET()
-            self._build_and_send_response()
-        
+                self.handle_GET()
+
+                print(f'Sending requested data from {self.url}')
+                self.build_and_send_response()
+
+            elif self.method == "Head":
+                self.build_and_send_response(should_send_data=False)
+
+            else:
+                self.handle_error()
+
+            print('Made it to the very end! <3')
+
  
         # Always generate a response, this is the fallback for if all other
         # validation and handling fails. This is acceptable as a last resort,
         # but were possible more helpful feedback and responses should be 
         # generated.
         except Exception as e:
-            self.status = STATUS_OTHER        
+            self.status = STATUS_OTHER
+            self.handle_error()        
 
-    # TODO: Might need more asserts
-    def _get_request_lines(self, split_message):
+
+    def gen_date(self):
+        self._date_format = '%a, %d %b %Y %H:%M:%S GMT'
+        now = datetime.now()
+        date = now.strftime(self._date_format)
+        self.response_headers.append(f'Date: {date}')
+
+
+    def gen_server(self):
+        self.ip = '127.0.0.1'
+        self.response_headers.append(f'Server: {self.ip}')
+
+
+    def get_request_lines(self, split_message):
         """
         Custom function to get request_lines from split_message. 
         Asserts that method, url and protocol are supported.
@@ -115,25 +131,25 @@ class RequestHandler(socketserver.StreamRequestHandler):
         # - method is supported
         if method not in ["GET", "HEAD"]:
             self.status = 400
-            self._handle_error()
+            self.handle_error()
             return
 
         # - url exists
         if not os.path.exists(url):
             self.status = 400
-            self._handle_error()
+            self.handle_error()
             return
 
         # - protocol is HTTP/1.1
         if protocol != "HTTP/1.1":
             self.status = 400
-            self._handle_error()
+            self.handle_error()
             return
         
         return method, url, protocol
 
 
-    def _get_header_lines(self, split_message):
+    def get_header_lines(self, split_message):
         """
         Custom function to get header_lines from split_message.
         Returns tuple containing header_lines and i. i is used by caller
@@ -153,23 +169,47 @@ class RequestHandler(socketserver.StreamRequestHandler):
             name, value = header_lines[element].split(sep=": ")
             header_dict.update({name: value})
         
-        # TODO: Update handle_*() methods to correspond to individual headers. Check capitalization of header fields.
         if "Host" not in header_dict:
-            self._handle_error(STATUS_BAD_REQUEST, f"Missing a Host header field")
+            self.handle_error(STATUS_BAD_REQUEST, f"Missing a Host header field")
+            print('Handled Host error')
         else:
             self.handle_Host(header_dict.get("Host"))
+            print('Handled Host')
+
+        # TODO: Fix self.handle_Accept() since it is currently broken. Then remove try/except below.
         if "Accept" in header_dict:
-            self.handle_Accept(header_dict.get("Accept"))
+            try:
+                self.handle_Accept(header_dict.get("Accept"))
+                print('Handled Accept')
+            except Exception as e:
+                print('Could not handle Accept')
+           
+        # TODO: Implement self.handle_Accept-Encoding()
         if "Accept-Encoding" in header_dict:
-            self.handle_Host(header_dict.get("Host"))
+            try:
+                self.handle_Accept-Encoding(header_dict.get("Accept-Encoding"))
+            except Exception as e:
+                print('Could not handle Accept-Encoding')
+
         if "Connection" in header_dict:
             self.handle_Connection(header_dict.get("Connection"))
+            print('Handled Connection')
+
+        # Note: This header is currently not included in test client request,
+        # thus it is correct to not handle right now.
         if "If-Modified-Since" in header_dict:
             self.handle_If_Modified_Since(header_dict.get("If-Modified-Since"))
+            print('Handled If-Modified-Since')
+
+         # Note: This header is currently not included in test client request,
+        # thus it is correct to not handle right now.
         if "if-Unmodified-since" in header_dict:
             self.handle_If_Unmodified_Since(header_dict.get("If-Unmodified-Since"))
-        if "User-agent" in header_dict:
+            print('Handled If-Unmodified-Since')
+        
+        if "User-Agent" in header_dict:
             self.handle_User_Agent(header_dict.get("User-Agent"))
+            print('Handled User-agent')
 
 
     def handle_Host(self, host: str):
@@ -179,7 +219,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
         # TODO: Could be upgraded to support servers that are not hosted locally
         if host != self.ip:
             self.status = 400
-            self._handle_error()
+            self.handle_error()
 
 
     # TODO: Handle Accept
@@ -216,7 +256,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
                 next
         if accepted_list == []:
             self.status = 406
-            self.__handle_error()
+            self.handle_error()
         else:
             final_dict = {}
             for elem in accepted_list:
@@ -231,6 +271,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
                 else:
                      next
             return
+
 
     # TODO: Might be expanded to support any comma-separated list of HTTP headers
     def handle_Connection(self, Connection):
@@ -251,18 +292,23 @@ class RequestHandler(socketserver.StreamRequestHandler):
         If succesful sets self.status to 200. This should be included
         in response to client.
         """
+        print('started handle_If_Modified_Since()')
         last_modified_secs = os.path.getmtime(self.url)
         last_modified_date = datetime.fromtimestamp(last_modified_secs)
         condition_date = datetime.strptime(If_Modified_Since, self._date_format)
 
+        print('condition_date:')
+        print(condition_date)
+
         # If modification date is older than condition
         if last_modified_date < condition_date:
             self.status = 304
-            self._handle_error()
+            self.handle_error()
             return
             
         else:
             self.status = 200 # OK
+
 
     def handle_If_Unmodified_Since(self, If_Unmodified_Since: str):
         """
@@ -277,7 +323,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
         # If modification date is later than condition
         if last_modified_date > condition_date:
             self.status = 412
-            self._handle_error()
+            self.handle_error()
             return
         else:
             self.status = 200 # OK
@@ -292,7 +338,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
         return
 
 
-    def _humanStatus(self):
+    def human_status(self):
         """
         Get human readable status message from statuscode 
         """
@@ -300,13 +346,13 @@ class RequestHandler(socketserver.StreamRequestHandler):
             "200": "OK",
             "301": "Moved Permanently",
             "304": "Not Modified",
-            "404": "Not found",
+            "404": "Not Found",
             "406": "Not Acceptable",
             "412": "Modified"
         }
         return status_messages[str(self.status)]
 
-    def _handle_GET(self) -> None:
+    def handle_GET(self) -> None:
         """
         Function to handle a 'get file' type request.
 
@@ -314,30 +360,36 @@ class RequestHandler(socketserver.StreamRequestHandler):
         always generated, either the data file or an error message explaining 
         what went wrong.
         """
+        if self.url[-1] == '/':
+            # If folder is requested, return index.html if it exists
+            if os.path.exists(self.url + 'index.html'):
+                self.url += 'index.html'
 
-        # Get file data as bytes
-        with open(self.url) as requested_file:
-            self.data = requested_file.read()
+            # Otherwise list contents of requested folder 
+            # and skip trying to read non-existant file
+            else:
+                self.data = '\n'.join(os.listdir())
+                return
 
-        # Send a response
-        print(f'Sending requested data from {self.url}')
-        self._build_and_send_response()
+        try:                    
+            with open(self.url) as requested_file:
+                self.data = requested_file.read()
+            print(f'Succesfully managed to read file at {self.url}')
+        except:
+            print('Could not read url')
+
         return
 
-    def _handle_HEAD(self):
-        self._build_and_send_response(should_send_data = False)
-        return
-
-    def _statusline(self):
-        return f"HTTP/1.1 {self.status} {self._humanStatus(self.status)}"
+    def gen_statusline(self):
+        return f"HTTP/1.1 {self.status} {self.human_status()}"
 
 
-    def _build_and_send_response(self, should_send_data = True):
-
-        statusline = self._statusline()
+    def build_and_send_response(self, should_send_data = True):
+        statusline = self.gen_statusline()
+        # print(self.data)
 
         # Content length response header
-        content_length = len(bytes(self.data))
+        content_length = len(bytes(self.data, 'utf-8'))
         self.response_headers.append(f'Content-Length: {content_length}')
 
         headers_str = '\r\n'.join(self.response_headers)
@@ -354,9 +406,10 @@ class RequestHandler(socketserver.StreamRequestHandler):
             self.server.server_close()
 
 
-    def _handle_error(self):
-        self.message = self._statusline() + "\r\n\r\n"
-        self._build_and_send_response()
+    #TODO: Make sure this correctly interrupts the rest of the thread.
+    def handle_error(self):
+        self.message = self.gen_statusline() + "\r\n\r\n"
+        self.build_and_send_response()
         return
 
 if __name__ == "__main__":
@@ -365,20 +418,11 @@ if __name__ == "__main__":
         "server_port": 12345,
     }    
     
-    # This check is not a formal requirement of the system but should let you 
-    # know if you've started your server in the wrong place. Do feel free to 
-    # change or remove this if you are wanting to use different data files
-    for f in ["tiny.txt", "hamlet.txt"]:
-        if not os.path.isfile(f): 
-            print(f"Server can't find expected data file {f}. Make sure you " + 
-                  "are starting the server with the files next to it in the " + 
-                  "directory")
-            exit(1)
-
     print(f"Starting server at: {configs['server_ip']}:"
         f"{configs['server_port']}")
     with HTTPServer(configs, RequestHandler) as exercise_server:
         try:
             exercise_server.serve_forever()
         finally:
+            print('Closing server')
             exercise_server.server_close()
