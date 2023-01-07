@@ -413,6 +413,8 @@ class RequestHandler(socketserver.StreamRequestHandler):
         try:                    
             with open(self.url, 'rb') as requested_file: 
                 self.data = requested_file.read()
+                if type(self.data) != bytes:
+                    bytes(self.data, 'utf-8')
             print(f'Succesfully managed to read file at {self.url}')
         except:
             print('Could not read url')
