@@ -215,17 +215,11 @@ class RequestHandler(socketserver.StreamRequestHandler):
             self.handle_error()
 
 
+    # TODO: Handle Accept
     def handle_Accept(self, accept: str):
         """
         Method to handle accept in header. Assumes an accept header is present in the file
         """
-
-        # From docs:
-        '''
-        If an Accept header field is present,
-        and if the server cannot send a response which is acceptable
-        according to the combined Accept field value, then the server SHOULD
-        send a 406 (not acceptable) response.'''
 
         # IF URL end with a dash, this is handled another place
         if self.url[-1] == "\\":
@@ -274,14 +268,23 @@ class RequestHandler(socketserver.StreamRequestHandler):
                         for type in types_subtypes:
                             for elem in	types_subtypes[type]:
                                 if os.path.exists(self.url + "." + elem):
+                                    MIME_type = best_option[0].split(sep="/")[0]
+                                    MIME_subtype = best_option[0].split(sep="/")[1]
+                                    self.response_headers.append(f"Content-Type: {MIME_type}/{MIME_subtype}")
                                     self.url = self.url + "." + elem
                                     return
                     else:
                         for elem in	types_subtypes[best_option[0].split(sep="/")[0]]:
                             if os.path.exists(self.url + "." + elem):
+                                MIME_type = best_option[0].split(sep="/")[0]
+                                MIME_subtype = best_option[0].split(sep="/")[1]
+                                self.response_headers.append(f"Content-Type: {MIME_type}/{MIME_subtype}")
                                 self.url = self.url + "." + best_option[0].split(sep="/")[1]
                                 return		
                 elif os.path.exists(self.url + "." + best_option[0].split(sep="/")[1]):
+                    MIME_type = best_option[0].split(sep="/")[0]
+                    MIME_subtype = best_option[0].split(sep="/")[1]
+                    self.response_headers.append(f"Content-Type: {MIME_type}/{MIME_subtype}")
                     self.url = self.url + "." + best_option[0].split(sep="/")[1]
                     return
                 else:
@@ -397,11 +400,13 @@ class RequestHandler(socketserver.StreamRequestHandler):
             # If folder is requested, return index.html if it exists
             if os.path.exists(self.url + 'index.html'):
                 self.url += 'index.html'
+                self.response_headers.append('Content-Type: text/html')
 
             # Otherwise list contents of requested folder 
             # and skip trying to read non-existant file
             else:
                 self.data = '\n'.join(os.listdir())
+                self.response_headers.append('Content-Type: text/plain')
                 return
         print(self.url)
         try:                    
