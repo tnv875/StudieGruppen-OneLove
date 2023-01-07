@@ -448,7 +448,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
         self.request.sendall(self.message)
 
     def handle_error(self):
-        self.message = self.gen_statusline() + "\r\n\r\n"
+        self.data = b""
         self.build_and_send_response()
         print(f"Handled error: {self.status, self.human_status()}")
         sys.exit()
