@@ -54,6 +54,9 @@ if __name__ == "__main__":
         # Correct request
         "GET / HTTP/1.1\r\nHost: 127.0.0.1\r\nAccept: */*\r\nAccept-Encoding: gzip, deflate\r\nUser-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13\r\nConnection: Keep-Alive\r\n\r\n",
 
+        # Correct request, no encoding
+        "GET / HTTP/1.1\r\nHost: 127.0.0.1\r\nAccept: */*\r\nUser-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13\r\nConnection: Keep-Alive\r\n\r\n",
+
         # Correct request, png requested
         "GET /Dog_meme HTTP/1.1\r\nHost: 127.0.0.1\r\nAccept: image/png\r\nAccept-Encoding: gzip, deflate\r\nUser-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13\r\nConnection: Keep-Alive\r\n\r\n",
 
