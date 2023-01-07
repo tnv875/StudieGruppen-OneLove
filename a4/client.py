@@ -28,10 +28,20 @@ def send_to_server(message: str) -> None:
 
         # Receive a response and print it
         response = client_socket.recv(MSG_MAX_SIZE)
+
+        # If uncompressed & text file
+        try:
+            print(response.decode('utf-8'))
+            client_socket.close()
+            return
+        except Exception as e:
+            print("Not pure text response")
+        
+        # If compressed
         response_split = response.split(b'\r\n\r\n')
         response_headers = response_split[0].decode('utf-8')
         payload = response_split[1]
-        
+
         # Uncompress if compressed
         if "Content-Encoding: gzip" in response_headers:
             import gzip
@@ -40,28 +50,25 @@ def send_to_server(message: str) -> None:
 
         print(response_headers + "\r\n\r\n" + payload)
 
-        # print(response.decode('utf-8'))
-
-        # This line is not strictly necessary due to the with statement, but
-        # has been left here to illustrate the complete socket lifespan
         client_socket.close()
 
+    
 
 if __name__ == "__main__":
     # Send a message to a server
 
     requests = [
-        # # Correct request
-        # "GET / HTTP/1.1\r\nHost: 127.0.0.1\r\nAccept: */*\r\nAccept-Encoding: gzip, deflate\r\nUser-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13\r\nConnection: Keep-Alive\r\n\r\n",
+        # Correct request
+        "GET / HTTP/1.1\r\nHost: 127.0.0.1\r\nAccept: */*\r\nAccept-Encoding: gzip, deflate\r\nUser-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13\r\nConnection: Keep-Alive\r\n\r\n",
 
-        # # Correct request, no encoding
-        # "GET / HTTP/1.1\r\nHost: 127.0.0.1\r\nAccept: */*\r\nUser-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13\r\nConnection: Keep-Alive\r\n\r\n",
+        # Correct request, no encoding
+        "GET / HTTP/1.1\r\nHost: 127.0.0.1\r\nAccept: */*\r\nUser-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13\r\nConnection: Keep-Alive\r\n\r\n",
 
         # Correct request, png requested
-        "GET /Dog_meme HTTP/1.1\r\nHost: 127.0.0.1\r\nAccept: */png\r\nUser-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13\r\nConnection: Keep-Alive\r\n\r\n",
+        # "GET /Dog_meme HTTP/1.1\r\nHost: 127.0.0.1\r\nAccept: */png\r\nUser-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13\r\nConnection: Keep-Alive\r\n\r\n",
 
         # Unsupported method
-        # "POST / HTTP/1.1\r\nHost: 127.0.0.1\r\nAccept: */*\r\nAccept-Encoding: gzip, deflate\r\nUser-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13\r\nConnection: Keep-Alive\r\n\r\n",
+        "POST / HTTP/1.1\r\nHost: 127.0.0.1\r\nAccept: */*\r\nAccept-Encoding: gzip, deflate\r\nUser-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13\r\nConnection: Keep-Alive\r\n\r\n",
 
         # Wrong host
         # "GET / HTTP/1.1\r\nHost: 127.0.0.6\r\nAccept: */*\r\nAccept-Encoding: gzip, deflate\r\nUser-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.2.13) Gecko/20101203 Firefox/3.6.13\r\nConnection: Keep-Alive\r\n\r\n",
