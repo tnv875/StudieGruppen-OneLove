@@ -57,6 +57,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
             self.message = ""
             self.data = ""
             self.connection = ""
+            self.encoding = ""
 
             # Add date and server IP to Response headers
             self.gen_date()
@@ -282,9 +283,20 @@ class RequestHandler(socketserver.StreamRequestHandler):
                     next
             return
 
-
-    # TODO: Make it work?
     def handle_Accept_Encoding(self, Accept_Encoding: str):
+        """
+        Custom function to handle Accept_Encoding header type.
+        Is only called if header lines include Accept_Encoding
+        Our implementation only supports gzip.
+        """
+
+        accepted = Accept_Encoding.split(', ')
+        if 'gzip' in accepted:
+            self.encoding = 'gzip'
+            self.response_headers.append("Content-Encoding: gzip")
+        else:
+            self.status = 406 # Encoding not acceptable
+            self.handle_error()
         return
 
 
@@ -376,7 +388,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
 
     def handle_GET(self) -> None:
         """
-        Function to handle a 'get file' type request.
+        Function to handle a 'GET' type request.
 
         A data file is read and sent back to the requestee. A response is 
         always generated, either the data file or an error message explaining 
@@ -395,6 +407,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
 
         try:                    
             with open(self.url) as requested_file:
+                # TODO: Make sure we can read img-files (these would be interpreted as bytes initially?) 
                 self.data = requested_file.read()
             print(f'Succesfully managed to read file at {self.url}')
         except:
@@ -405,24 +418,27 @@ class RequestHandler(socketserver.StreamRequestHandler):
     def gen_statusline(self):
         return f"HTTP/1.1 {self.status} {self.human_status()}"
 
-
     def build_and_send_response(self, should_send_data = True):
-        statusline = self.gen_statusline()
+        statusline = bytes(self.gen_statusline(), 'utf-8')
+        data_bytes = bytes(self.data, 'utf-8')
 
-        # Content length response header
-        content_length = len(bytes(self.data, 'utf-8'))
-        if content_length != 0:
-            self.response_headers.append(f'Content-Length: {content_length}')
+        if should_send_data:
+            if self.encoding == "gzip":
+                import gzip
+                data_bytes = gzip.compress(data_bytes)
 
-        headers_str = '\r\n'.join(self.response_headers)
+            # Content length response header
+            content_length = len(data_bytes)
+            if content_length != 0:
+                self.response_headers.append(f'Content-Length: {content_length}')
 
-        if not should_send_data:
-            self.data = ""
+        else:
+            data_bytes = b""
 
-        self.message = '\r\n'.join([statusline, headers_str, '', self.data])
+        headers = bytes('\r\n'.join(self.response_headers), 'utf-8')
+        self.message = b'\r\n'.join([statusline, headers, b'', data_bytes])
 
-        bytes_message = bytes(self.message, 'utf-8')
-        self.request.sendall(bytes_message)
+        self.request.sendall(self.message)
         if self.connection == 'close':
             print("Closing since client asked me to")
             self.server.server_close()
