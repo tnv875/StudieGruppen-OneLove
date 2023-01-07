@@ -340,9 +340,6 @@ class RequestHandler(socketserver.StreamRequestHandler):
         last_modified_date = datetime.fromtimestamp(last_modified_secs)
         condition_date = datetime.strptime(If_Modified_Since, self._date_format)
 
-        print('condition_date:')
-        print(condition_date)
-
         # If modification date is older than condition
         if last_modified_date < condition_date:
             self.status = 304
@@ -461,7 +458,6 @@ class RequestHandler(socketserver.StreamRequestHandler):
             self.server.server_close()
 
 
-    #TODO: Make sure this correctly interrupts the rest of the thread.
     def handle_error(self):
         self.message = self.gen_statusline() + "\r\n\r\n"
         self.build_and_send_response()
