@@ -315,6 +315,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
         self.connection = Connection
         
         #Add Connection response to output header
+        #TODO: Text connection response header handling
         self.response_headers.append(f'Connection: {Connection}')
 
 
