@@ -411,7 +411,6 @@ class RequestHandler(socketserver.StreamRequestHandler):
                 self.data = '\n'.join(os.listdir())
                 self.response_headers.append('Content-Type: text/plain')
                 return
-        print(self.url)
         try:                    
             with open(self.url, 'rb') as requested_file: 
                 self.data = requested_file.read()
