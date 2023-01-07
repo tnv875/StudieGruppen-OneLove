@@ -55,6 +55,8 @@ class RequestHandler(socketserver.StreamRequestHandler):
             self.status = 200 # OK
             self.response_headers = []
             self.message = ""
+            self.data = ""
+            self.connection = ""
 
             # Add date and server IP to Response headers
             self.gen_date()
@@ -101,7 +103,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
         # but were possible more helpful feedback and responses should be 
         # generated.
         except Exception as e:
-            self.status = STATUS_OTHER
+            self.status = 400
             self.handle_error()        
 
 
@@ -292,7 +294,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
         Sets self.server_should_close to True. Caller should use this
         variable to close the connection after response has been processed.
         """
-        self.Connection = Connection
+        self.connection = Connection
         
         #Add Connection response to output header
         self.response_headers.append(f'Connection: {Connection}')
@@ -355,14 +357,20 @@ class RequestHandler(socketserver.StreamRequestHandler):
         Get human readable status message from statuscode 
         """
         status_messages = {
-            "200": "OK",
-            "301": "Moved Permanently",
-            "304": "Not Modified",
-            "404": "Not Found",
-            "406": "Not Acceptable",
-            "412": "Modified"
+              4: "Other",
+            200: "OK",
+            301: "Moved Permanently",
+            304: "Not Modified",
+            400: "Bad Request",
+            404: "Not Found",
+            406: "Not Acceptable",
+            412: "Modified"
         }
-        return status_messages[str(self.status)]
+
+        if self.status in status_messages:
+            return status_messages[self.status]
+        else:
+            return "Unsupported status"
 
     def handle_GET(self) -> None:
         """
@@ -398,7 +406,6 @@ class RequestHandler(socketserver.StreamRequestHandler):
 
     def build_and_send_response(self, should_send_data = True):
         statusline = self.gen_statusline()
-        # print(self.data)
 
         # Content length response header
         content_length = len(bytes(self.data, 'utf-8'))
@@ -413,7 +420,7 @@ class RequestHandler(socketserver.StreamRequestHandler):
 
         bytes_message = bytes(self.message, 'utf-8')
         self.request.sendall(bytes_message)
-        if self.Connection == 'close':
+        if self.connection == 'close':
             print("Closing since client asked me to")
             self.server.server_close()
 
