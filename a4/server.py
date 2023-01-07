@@ -199,13 +199,17 @@ class RequestHandler(socketserver.StreamRequestHandler):
 
          # Note: This header is currently not included in test client request,
         # thus it is correct to not handle right now.
-        if "if-Unmodified-since" in header_dict:
-            self.handle_If_Unmodified_Since(header_dict.get("If-Unmodified-Since"))
-            print('Handled If-Unmodified-Since')
+        if "If-Unmodified-Since" in header_dict:
+            try:
+                self.handle_If_Unmodified_Since(header_dict.get("If-Unmodified-Since"))
+                print('Handled If-Unmodified-Since')
+            except Exception as e:
+                print('Could not handle If-Unmodified-Since')
+
         
         if "User-Agent" in header_dict:
             self.handle_User_Agent(header_dict.get("User-Agent"))
-            print('Handled User-agent')
+            print('Handled User-Agent')
 
 
     def handle_Host(self, host: str):
