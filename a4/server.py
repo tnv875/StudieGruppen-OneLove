@@ -137,12 +137,6 @@ class RequestHandler(socketserver.StreamRequestHandler):
             self.handle_error()
             return
 
-        # - url exists
-        if not os.path.exists(url):
-            self.status = 400
-            self.handle_error()
-            return
-
         # - protocol is HTTP/1.1
         if protocol != "HTTP/1.1":
             self.status = 505
