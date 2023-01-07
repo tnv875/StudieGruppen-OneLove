@@ -1,6 +1,8 @@
+import os
+url = "C:\\Users\\Lenovo\\Documents\\GitHub\\StudieGruppen-OneLove\\a4\\Dog_meme"
 
 
-accept = "*/*;q=0.5, image/png;q=0.6"
+accept = "*/*"
 
 types = accept.split(sep= ", ")
 
@@ -14,14 +16,14 @@ for type_ in types:
 		else:
 			types_dict.update({type_: "1.1"})
 	except:
-		print("Here")
+		next
 
 types_subtypes = {"*": "*", "image": ["jpeg", "png", "svg+xml"], "text": ["html", "plain", "csv", "css"], "application": ["xhtml+xml", "xml"]}
 accepted_list = []
 for type_subtype in types_dict.keys():
 	MIME_type, MIME_subtype = type_subtype.split(sep="/")
 	if MIME_type in types_subtypes:
-		if MIME_subtype in types_subtypes[MIME_type]:
+		if (MIME_subtype in types_subtypes[MIME_type]) or MIME_type == "*":
 			#Make a list of all matches --> Sorted List
 			accepted_list.append(MIME_type+"/"+MIME_subtype)
 		else:
@@ -39,9 +41,23 @@ else:
 	
 	# Search for file ending in sorted order from URL and self 
 	for best_option in sorted_final_list_tuples:
-		print(best_option)
-		
-		#if os.path.exists(self.url + "." + best_option[0]):
-		#	self.url = self.url+"."+best_option[0]
-		#else:
-		#		next
+		if best_option[0].split(sep="/")[1] =="*":
+			if best_option[0].split(sep="/")[0] == "*":
+				for type in types_subtypes:
+
+					for elem in	types_subtypes[type]:
+						if os.path.exists(url + "." + elem):
+							url = url + "." + elem
+							print(url)
+			else:
+				for elem in	types_subtypes[best_option[0].split(sep="/")[0]]:
+					if os.path.exists(url + "." + elem):
+						url = url + "." + best_option[0].split(sep="/")[1]
+						print(url)
+						break		
+		elif os.path.exists(url + "." + best_option[0].split(sep="/")[1]):
+			url = url + "." + best_option[0].split(sep="/")[1]
+			print(url)
+			break
+		else:
+			next

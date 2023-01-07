@@ -239,6 +239,10 @@ class RequestHandler(socketserver.StreamRequestHandler):
         according to the combined Accept field value, then the server SHOULD
         send a 406 (not acceptable) response.'''
 
+        # IF URL end with a dash, this is handled another place
+        if self.url[-1] == "\\":
+            return
+
         types = accept.split(sep= ", ")
 
         types_dict = {}
@@ -251,14 +255,14 @@ class RequestHandler(socketserver.StreamRequestHandler):
                 else:
                     types_dict.update({type_: "1.1"})
             except:
-                print("Here")
+                next
 
-        types_subtypes = {"*": "*", "image": ["jpeg", "png", "svg+xml"], "text": ["html", "plain", "csv", "css"], "application": ["xhtml+xml", "xml"]}
+        types_subtypes = {"*": "*", "image": ["jpeg", "jpg", "png", "svg+xml"], "text": ["html", "plain", "csv", "css"], "application": ["xhtml+xml", "xml"]}
         accepted_list = []
         for type_subtype in types_dict.keys():
             MIME_type, MIME_subtype = type_subtype.split(sep="/")
             if MIME_type in types_subtypes:
-                if MIME_subtype in types_subtypes[MIME_type]:
+                if MIME_subtype in types_subtypes[MIME_type] or MIME_type == "*":
                     #Make a list of all matches --> Sorted List
                     accepted_list.append(MIME_type+"/"+MIME_subtype)
                 else:
@@ -277,11 +281,23 @@ class RequestHandler(socketserver.StreamRequestHandler):
             
             # Search for file ending in sorted order from URL and self 
             for best_option in sorted_final_list_tuples:
-                if os.path.exists(self.url + "." + best_option[0]):
-                    self.url = self.url+"."+best_option[0]
+                if best_option[0].split(sep="/")[1] =="*":
+                    if best_option[0].split(sep="/")[0] == "*":
+                        for type in types_subtypes:
+                            for elem in	types_subtypes[type]:
+                                if os.path.exists(self.url + "." + elem):
+                                    self.url = self.url + "." + elem
+                                    return
+                    else:
+                        for elem in	types_subtypes[best_option[0].split(sep="/")[0]]:
+                            if os.path.exists(self.url + "." + elem):
+                                self.url = self.url + "." + best_option[0].split(sep="/")[1]
+                                return		
+                elif os.path.exists(self.url + "." + best_option[0].split(sep="/")[1]):
+                    self.url = self.url + "." + best_option[0].split(sep="/")[1]
+                    return
                 else:
                     next
-            return
 
     def handle_Accept_Encoding(self, Accept_Encoding: str):
         """
