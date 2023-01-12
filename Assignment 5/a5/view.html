@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Visualisation</title>
+  </head>
+
+  <body>
+    <h1>Visualisation</h1>
+
+    Frame: <span id="counter">0</span>
+
+    <p>
+      <img id="canvas" />
+    </p>
+
+    <p id="problem"></p>
+
+    <script>
+      let step = 0;
+      const counter = document.getElementById('counter');
+      const problem = document.getElementById('problem');
+      const canvas = document.getElementById('canvas');
+
+      function it_went_wrong(reason) {
+          console.error(reason);
+          problem.innerText = "Something went wrong.";
+      }
+
+      function do_step() {
+          var xhr = new XMLHttpRequest();
+          xhr.open("POST", "http://localhost:8080/step", true);
+          xhr.onload = function (e) {
+              if (xhr.readyState === 4) {
+                  if (xhr.status === 200) {
+                      counter.innerText = "" + step;
+                      canvas.src = 'data:image/png;base64, ' + xhr.response;
+                      do_step();
+                      step++;
+                  } else {
+                      it_went_wrong(xhr.statusText);
+                  }
+              }
+          };
+          xhr.onerror = function (e) {
+              it_went_wrong(xhr.statusText);
+          };
+          xhr.send(null);
+      }
+
+      do_step();
+    </script>
+  </body>
+</html>
