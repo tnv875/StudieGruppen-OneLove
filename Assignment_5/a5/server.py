@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 
-from http.server import *
-import png
-import numpy as np
-import io
 import base64
+import importlib
+import io
+from http.server import *
+
+import numpy as np
+import png
+
 import colormap
 
-import importlib
 heat2d = importlib.import_module("heat2d")
 
 # The size of the simulated grid.
@@ -17,7 +19,7 @@ width, height = (200, 200)
 # this to spend more time on compute and less time on graphics.  You
 # should definitely make this 10 or 50 or some similar number once you
 # have a parallel C implementation.
-steps_per_frame = 1
+steps_per_frame = 50
 
 # Set this to True to use the C-accelerated implementation.
 use_c = False
